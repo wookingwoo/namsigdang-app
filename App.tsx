@@ -11,13 +11,14 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { getMenuByDate } from "./src/services/menu";
 import type { Campus, MealType, MenuDay } from "./src/types/menu";
 
 const CAMPUS_OPTIONS: Array<{ label: string; value: Campus }> = [
-  { label: "은평관", value: "Eunpyeong" },
   { label: "동작관", value: "Dongjak" },
+  { label: "은평관", value: "Eunpyeong" },
 ];
 
 const MEAL_LABELS: Record<MealType, string> = {
@@ -28,6 +29,7 @@ const MEAL_LABELS: Record<MealType, string> = {
 
 const MENU_LOAD_ERROR_MESSAGE =
   "현재 식단 정보를 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.";
+const CAMPUS_STORAGE_KEY = "selectedCampus";
 
 const dayFormatter = new Intl.DateTimeFormat("ko-KR", {
   month: "long",
@@ -78,6 +80,10 @@ function getDateStripDates(dateKey: string, visibleDays: number) {
 
 function formatDayOfMonth(dateKey: string) {
   return `${parseDateKey(dateKey).getDate()}`;
+}
+
+function isCampus(value: string): value is Campus {
+  return CAMPUS_OPTIONS.some((option) => option.value === value);
 }
 
 function CampusToggle({
@@ -243,13 +249,69 @@ function MealCard({
 
 export default function App() {
   const { width } = useWindowDimensions();
-  const [campus, setCampus] = useState<Campus>("Eunpyeong");
+  const [campus, setCampus] = useState<Campus | null>(null);
   const [dateKey, setDateKey] = useState(createTodayKey);
   const [menuDay, setMenuDay] = useState<MenuDay | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCampusHydrated, setIsCampusHydrated] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
+    async function restoreCampus() {
+      try {
+        const savedCampus = await AsyncStorage.getItem(CAMPUS_STORAGE_KEY);
+        if (!cancelled) {
+          setCampus(savedCampus && isCampus(savedCampus) ? savedCampus : "Eunpyeong");
+        }
+      } catch (storageError) {
+        if (__DEV__) {
+          console.error("Failed to restore campus:", storageError);
+        }
+        if (!cancelled) {
+          setCampus("Eunpyeong");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsCampusHydrated(true);
+        }
+      }
+    }
+
+    void restoreCampus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isCampusHydrated || !campus) {
+      return;
+    }
+
+    const selectedCampus = campus;
+
+    async function persistCampus() {
+      try {
+        await AsyncStorage.setItem(CAMPUS_STORAGE_KEY, selectedCampus);
+      } catch (storageError) {
+        if (__DEV__) {
+          console.error("Failed to persist campus:", storageError);
+        }
+      }
+    }
+
+    void persistCampus();
+  }, [campus, isCampusHydrated]);
+
+  useEffect(() => {
+    if (!isCampusHydrated || !campus) {
+      return;
+    }
+
+    const selectedCampus = campus;
     let cancelled = false;
 
     async function loadMenu() {
@@ -257,7 +319,7 @@ export default function App() {
       setError(null);
 
       try {
-        const menu = await getMenuByDate(campus, dateKey);
+        const menu = await getMenuByDate(selectedCampus, dateKey);
         if (!cancelled) {
           setMenuDay(menu);
         }
@@ -298,7 +360,11 @@ export default function App() {
         ]}
       >
         <View style={styles.controlsPanel}>
-          <CampusToggle campus={campus} onChange={setCampus} />
+          {campus ? (
+            <CampusToggle campus={campus} onChange={setCampus} />
+          ) : (
+            <View style={styles.controlsPlaceholder} />
+          )}
         </View>
 
         <View style={styles.contentCard}>
@@ -367,6 +433,9 @@ const styles = StyleSheet.create({
   },
   controlsPanel: {
     paddingHorizontal: 4,
+  },
+  controlsPlaceholder: {
+    height: 58,
   },
   contentCard: {
     backgroundColor: "#fffaf5",
