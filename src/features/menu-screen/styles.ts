@@ -126,6 +126,9 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    width: "100%",
+    maxWidth: 860,
+    alignSelf: "center",
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 8,
@@ -162,7 +165,7 @@ export const styles = StyleSheet.create({
     width: "100%",
   },
   aboutModalBodyWide: {
-    maxWidth: 760,
+    maxWidth: 860,
     alignSelf: "center",
   },
   infoCard: {
@@ -220,25 +223,46 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#16376d",
   },
-  infoActionRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+  infoLinkList: {
     gap: 10,
     paddingTop: 4,
   },
-  infoActionButton: {
+  infoLinkRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
     paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 999,
+    paddingVertical: 14,
+    borderRadius: 20,
     backgroundColor: "#edf4ff",
     borderWidth: 1,
     borderColor: "#d2e2ff",
   },
-  infoActionButtonPressed: {
+  infoLinkRowPressed: {
     backgroundColor: "#dceaff",
   },
-  infoActionText: {
+  infoLinkIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 999,
+    backgroundColor: "#ffffff",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  infoLinkTextWrap: {
+    flex: 1,
+    minWidth: 0,
+  },
+  infoLinkLabel: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#6f86a7",
+    textTransform: "uppercase",
+  },
+  infoLinkValue: {
     fontSize: 14,
+    lineHeight: 21,
     fontWeight: "800",
     color: "#1a58ba",
   },

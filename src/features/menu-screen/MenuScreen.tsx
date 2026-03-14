@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import {
   ActivityIndicator,
@@ -22,6 +23,8 @@ import { useMenuScreen } from "./useMenuScreen";
 
 const DEVELOPER_EMAIL = "contact@wookingwoo.com";
 const GITHUB_URL = "https://github.com/wookingwoo/namsigdang-app";
+const GITHUB_REPOSITORY = "wookingwoo/namsigdang-app";
+const DEVELOPER_URL = "https://wookingwoo.com";
 
 export function MenuScreen() {
   const [aboutVisible, setAboutVisible] = useState(false);
@@ -54,7 +57,7 @@ export function MenuScreen() {
               </View>
               <Text style={styles.headerTitle}>
                 남식당{" "}
-                <Text style={styles.headerTitleMeta}>(남도학숙 식단정보)</Text>
+                <Text style={styles.headerTitleMeta}>남도학숙 식단정보</Text>
               </Text>
             </View>
             <Pressable
@@ -150,54 +153,83 @@ export function MenuScreen() {
                     style={styles.infoCardIcon}
                   />
                   <View style={styles.infoCardTitleWrap}>
-                    <Text style={styles.infoEyebrow}>Service</Text>
+                    <Text style={styles.infoEyebrow}>남식당</Text>
                     <Text style={styles.infoTitle}>
-                      남도학숙 생활 편익을 위한 공익 서비스
+                      남도학숙 식단 정보
                     </Text>
                   </View>
                 </View>
 
                 <Text style={styles.infoDescription}>
-                  남식당은 남도학숙 학생들이 식단 정보를 더 빠르게 확인할 수 있도록
-                  만든 생활 편의 서비스입니다.
+                  남식당은 남도학숙 사생들을 위한 식단 정보 생활 편의 공익 서비스입니다. 사용 중 불편한 점이나 버그, 건의사항이 있다면 이메일로 편하게 알려주세요. GitHub Issue나 PR을 통한 오픈소스 기여도 환영합니다.
                 </Text>
 
-                <View style={styles.infoMetaGroup}>
-                  <Text style={styles.infoMetaLabel}>개발자</Text>
-                  <Text style={styles.infoMetaValue}>wookingwoo</Text>
-                </View>
+                <View style={styles.infoLinkList}>
+                  <Pressable
+                    onPress={() => void Linking.openURL(DEVELOPER_URL)}
+                    style={({ pressed }) => [
+                      styles.infoLinkRow,
+                      pressed && styles.infoLinkRowPressed,
+                    ]}
+                  >
+                    <View style={styles.infoLinkIconWrap}>
+                      <Ionicons name="person-outline" size={20} color="#1a58ba" />
+                    </View>
+                    <View style={styles.infoLinkTextWrap}>
+                      <Text style={styles.infoLinkLabel}>개발자</Text>
+                      <Text style={styles.infoLinkValue}>wookingwoo</Text>
+                    </View>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={18}
+                      color="#7a93b8"
+                    />
+                  </Pressable>
 
-                <View style={styles.infoMetaGroup}>
-                  <Text style={styles.infoMetaLabel}>연락처</Text>
-                  <Text style={styles.infoMetaValue}>{DEVELOPER_EMAIL}</Text>
-                </View>
-
-                <View style={styles.infoMetaGroup}>
-                  <Text style={styles.infoMetaLabel}>GitHub</Text>
-                  <Text style={styles.infoMetaValue}>{GITHUB_URL}</Text>
-                </View>
-
-                <View style={styles.infoActionRow}>
                   <Pressable
                     onPress={() =>
                       void Linking.openURL(`mailto:${DEVELOPER_EMAIL}`)
                     }
                     style={({ pressed }) => [
-                      styles.infoActionButton,
-                      pressed && styles.infoActionButtonPressed,
+                      styles.infoLinkRow,
+                      pressed && styles.infoLinkRowPressed,
                     ]}
                   >
-                    <Text style={styles.infoActionText}>이메일</Text>
+                    <View style={styles.infoLinkIconWrap}>
+                      <Ionicons name="mail-outline" size={20} color="#1a58ba" />
+                    </View>
+                    <View style={styles.infoLinkTextWrap}>
+                      <Text style={styles.infoLinkLabel}>연락처</Text>
+                      <Text style={styles.infoLinkValue}>{DEVELOPER_EMAIL}</Text>
+                    </View>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={18}
+                      color="#7a93b8"
+                    />
                   </Pressable>
 
                   <Pressable
                     onPress={() => void Linking.openURL(GITHUB_URL)}
                     style={({ pressed }) => [
-                      styles.infoActionButton,
-                      pressed && styles.infoActionButtonPressed,
+                      styles.infoLinkRow,
+                      pressed && styles.infoLinkRowPressed,
                     ]}
                   >
-                    <Text style={styles.infoActionText}>GitHub 열기</Text>
+                    <View style={styles.infoLinkIconWrap}>
+                      <Ionicons name="logo-github" size={20} color="#1a58ba" />
+                    </View>
+                    <View style={styles.infoLinkTextWrap}>
+                      <Text style={styles.infoLinkLabel}>GitHub</Text>
+                      <Text style={styles.infoLinkValue}>
+                        {GITHUB_REPOSITORY}
+                      </Text>
+                    </View>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={18}
+                      color="#7a93b8"
+                    />
                   </Pressable>
                 </View>
               </View>
