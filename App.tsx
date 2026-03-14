@@ -63,10 +63,10 @@ function formatDateLabel(dateKey: string) {
   return dayFormatter.format(date);
 }
 
-function getWeekDates(dateKey: string) {
+function getDateStripDates(dateKey: string) {
   const selectedDate = parseDateKey(dateKey);
   const startDate = new Date(selectedDate);
-  startDate.setDate(selectedDate.getDate() - selectedDate.getDay());
+  startDate.setDate(selectedDate.getDate() - 3);
 
   return Array.from({ length: 7 }, (_, index) => {
     const currentDate = new Date(startDate);
@@ -74,7 +74,6 @@ function getWeekDates(dateKey: string) {
     return formatDateKey(currentDate);
   });
 }
-
 
 function formatDayOfMonth(dateKey: string) {
   return `${parseDateKey(dateKey).getDate()}`;
@@ -120,14 +119,14 @@ function WeekDatePicker({
   onChange: (dateKey: string) => void;
 }) {
   const todayKey = createTodayKey();
-  const weekDates = getWeekDates(dateKey);
-  const isToday = dateKey === todayKey;
+  const tomorrowKey = shiftDate(todayKey, 1);
+  const dateStripDates = getDateStripDates(dateKey);
 
   return (
     <View style={styles.dateCard}>
       <View style={styles.dateNavRow}>
         <Pressable
-          onPress={() => onChange(shiftDate(dateKey, -7))}
+          onPress={() => onChange(shiftDate(dateKey, -1))}
           style={styles.weekNavButton}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
@@ -135,18 +134,45 @@ function WeekDatePicker({
         </Pressable>
         <View style={styles.dateNavCenter}>
           <Text style={styles.dateValue}>{formatDateLabel(dateKey)}</Text>
-          {!isToday && (
+          <View style={styles.shortcutRow}>
             <Pressable
               onPress={() => onChange(todayKey)}
-              style={styles.todayButton}
+              style={[
+                styles.todayButton,
+                dateKey === todayKey && styles.todayButtonActive,
+              ]}
               hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
             >
-              <Text style={styles.todayButtonText}>오늘</Text>
+              <Text
+                style={[
+                  styles.todayButtonText,
+                  dateKey === todayKey && styles.todayButtonTextActive,
+                ]}
+              >
+                오늘
+              </Text>
             </Pressable>
-          )}
+            <Pressable
+              onPress={() => onChange(tomorrowKey)}
+              style={[
+                styles.todayButton,
+                dateKey === tomorrowKey && styles.todayButtonActive,
+              ]}
+              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+            >
+              <Text
+                style={[
+                  styles.todayButtonText,
+                  dateKey === tomorrowKey && styles.todayButtonTextActive,
+                ]}
+              >
+                내일
+              </Text>
+            </Pressable>
+          </View>
         </View>
         <Pressable
-          onPress={() => onChange(shiftDate(dateKey, 7))}
+          onPress={() => onChange(shiftDate(dateKey, 1))}
           style={styles.weekNavButton}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
@@ -155,18 +181,19 @@ function WeekDatePicker({
       </View>
 
       <View style={styles.weekRow}>
-        {weekDates.map((weekDateKey) => {
-          const selected = weekDateKey === dateKey;
-          const today = weekDateKey === todayKey;
-          const dayOfWeek = parseDateKey(weekDateKey).getDay();
+        {dateStripDates.map((stripDateKey) => {
+          const selected = stripDateKey === dateKey;
+          const today = stripDateKey === todayKey;
+          const isTomorrow = stripDateKey === tomorrowKey;
+          const dayOfWeek = parseDateKey(stripDateKey).getDay();
           const weekday = WEEKDAY_LABELS[dayOfWeek];
           const isSunday = dayOfWeek === 0;
           const isSaturday = dayOfWeek === 6;
 
           return (
             <Pressable
-              key={weekDateKey}
-              onPress={() => onChange(weekDateKey)}
+              key={stripDateKey}
+              onPress={() => onChange(stripDateKey)}
               style={({ pressed }) => [
                 styles.dayChip,
                 selected && styles.dayChipActive,
@@ -190,9 +217,18 @@ function WeekDatePicker({
                   selected && styles.dayChipTextActive,
                 ]}
               >
-                {formatDayOfMonth(weekDateKey)}
+                {formatDayOfMonth(stripDateKey)}
               </Text>
-              {today && <View style={[styles.todayDot, selected && styles.todayDotActive]} />}
+              {(today || isTomorrow) && (
+                <Text
+                  style={[
+                    styles.dayChipMeta,
+                    selected && styles.dayChipMetaActive,
+                  ]}
+                >
+                  {today ? "오늘" : "내일"}
+                </Text>
+              )}
             </Pressable>
           );
         })}
@@ -401,15 +437,25 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   todayButton: {
-    backgroundColor: "#b14d27",
+    backgroundColor: "#f5ece4",
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 5,
   },
+  todayButtonActive: {
+    backgroundColor: "#b14d27",
+  },
   todayButtonText: {
-    color: "#fff",
+    color: "#7a4e3c",
     fontSize: 12,
     fontWeight: "800",
+  },
+  todayButtonTextActive: {
+    color: "#fff",
+  },
+  shortcutRow: {
+    flexDirection: "row",
+    gap: 8,
   },
   weekNavButton: {
     width: 44,
@@ -471,18 +517,17 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: "#2d170f",
   },
-  dayChipTextActive: {
-    color: "#fff8f2",
-  },
-  todayDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 999,
-    backgroundColor: "#b14d27",
+  dayChipMeta: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#b14d27",
     marginTop: 1,
   },
-  todayDotActive: {
-    backgroundColor: "rgba(255,248,242,0.8)",
+  dayChipMetaActive: {
+    color: "rgba(255,248,242,0.85)",
+  },
+  dayChipTextActive: {
+    color: "#fff8f2",
   },
   feedbackCard: {
     backgroundColor: "#fff",
