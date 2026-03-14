@@ -4,7 +4,7 @@ const dayFormatter = new Intl.DateTimeFormat("ko-KR", {
   weekday: "long",
 });
 
-export const MENU_HISTORY_MONTHS = 3;
+export const MENU_ACCESS_MONTHS = 3;
 
 function normalizeDate(date: Date) {
   const normalizedDate = new Date(date);
@@ -47,7 +47,11 @@ export function parseDateKey(dateKey: string) {
 }
 
 export function createMenuHistoryStartKey(referenceDate = new Date()) {
-  return formatDateKey(shiftCalendarMonths(referenceDate, -MENU_HISTORY_MONTHS));
+  return formatDateKey(shiftCalendarMonths(referenceDate, -MENU_ACCESS_MONTHS));
+}
+
+export function createMenuHistoryEndKey(referenceDate = new Date()) {
+  return formatDateKey(shiftCalendarMonths(referenceDate, MENU_ACCESS_MONTHS));
 }
 
 export function isDateKeyWithinMenuHistory(
@@ -55,22 +59,37 @@ export function isDateKeyWithinMenuHistory(
   referenceDate = new Date(),
 ) {
   const minimumDate = normalizeDate(
-    shiftCalendarMonths(referenceDate, -MENU_HISTORY_MONTHS),
+    shiftCalendarMonths(referenceDate, -MENU_ACCESS_MONTHS),
+  );
+  const maximumDate = normalizeDate(
+    shiftCalendarMonths(referenceDate, MENU_ACCESS_MONTHS),
   );
   const selectedDate = normalizeDate(parseDateKey(dateKey));
 
-  return selectedDate >= minimumDate;
+  return selectedDate >= minimumDate && selectedDate <= maximumDate;
 }
 
 export function clampDateKeyToMenuHistory(
   dateKey: string,
   referenceDate = new Date(),
 ) {
-  if (isDateKeyWithinMenuHistory(dateKey, referenceDate)) {
-    return dateKey;
+  const minimumDate = normalizeDate(
+    shiftCalendarMonths(referenceDate, -MENU_ACCESS_MONTHS),
+  );
+  const maximumDate = normalizeDate(
+    shiftCalendarMonths(referenceDate, MENU_ACCESS_MONTHS),
+  );
+  const selectedDate = normalizeDate(parseDateKey(dateKey));
+
+  if (selectedDate < minimumDate) {
+    return createMenuHistoryStartKey(referenceDate);
   }
 
-  return createMenuHistoryStartKey(referenceDate);
+  if (selectedDate > maximumDate) {
+    return createMenuHistoryEndKey(referenceDate);
+  }
+
+  return dateKey;
 }
 
 export function formatDateKey(date: Date) {
@@ -89,10 +108,12 @@ export function getDateStripDates(
   dateKey: string,
   visibleDays: number,
   minimumDateKey?: string,
+  maximumDateKey?: string,
 ) {
   const selectedDate = parseDateKey(dateKey);
   const startDate = new Date(selectedDate);
   const daysBeforeSelected = Math.floor(visibleDays / 2);
+  const daysAfterSelected = visibleDays - daysBeforeSelected - 1;
 
   startDate.setDate(selectedDate.getDate() - daysBeforeSelected);
 
@@ -100,6 +121,24 @@ export function getDateStripDates(
     const minimumDate = parseDateKey(minimumDateKey);
     if (startDate < minimumDate) {
       startDate.setTime(minimumDate.getTime());
+    }
+  }
+
+  if (maximumDateKey) {
+    const maximumDate = parseDateKey(maximumDateKey);
+    const lastVisibleDate = new Date(startDate);
+    lastVisibleDate.setDate(startDate.getDate() + visibleDays - 1);
+
+    if (lastVisibleDate > maximumDate) {
+      startDate.setTime(maximumDate.getTime());
+      startDate.setDate(maximumDate.getDate() - daysAfterSelected);
+
+      if (minimumDateKey) {
+        const minimumDate = parseDateKey(minimumDateKey);
+        if (startDate < minimumDate) {
+          startDate.setTime(minimumDate.getTime());
+        }
+      }
     }
   }
 

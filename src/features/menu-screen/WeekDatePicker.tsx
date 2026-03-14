@@ -2,6 +2,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { WEEKDAY_LABELS } from "./constants";
 import {
+  createMenuHistoryEndKey,
   createMenuHistoryStartKey,
   createTodayKey,
   formatDateLabel,
@@ -26,14 +27,18 @@ export function WeekDatePicker({
 }: WeekDatePickerProps) {
   const todayKey = createTodayKey();
   const minimumDateKey = createMenuHistoryStartKey();
+  const maximumDateKey = createMenuHistoryEndKey();
   const dateStripDates = getDateStripDates(
     dateKey,
     compact ? 5 : 7,
     minimumDateKey,
+    maximumDateKey,
   );
   const isTodaySelected = dateKey === todayKey;
   const previousDateKey = shiftDate(dateKey, -1);
+  const nextDateKey = shiftDate(dateKey, 1);
   const canGoPrevious = isDateKeyWithinMenuHistory(previousDateKey);
+  const canGoNext = isDateKeyWithinMenuHistory(nextDateKey);
 
   return (
     <View style={styles.dateCard}>
@@ -63,14 +68,23 @@ export function WeekDatePicker({
         </View>
 
         <Pressable
-          onPress={() => onChange(shiftDate(dateKey, 1))}
+          disabled={!canGoNext}
+          onPress={() => onChange(nextDateKey)}
           style={({ pressed }) => [
             styles.weekNavButton,
+            !canGoNext && styles.weekNavButtonDisabled,
             pressed && styles.weekNavButtonPressed,
           ]}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={styles.weekNavArrow}>›</Text>
+          <Text
+            style={[
+              styles.weekNavArrow,
+              !canGoNext && styles.weekNavArrowDisabled,
+            ]}
+          >
+            ›
+          </Text>
         </Pressable>
       </View>
 
@@ -141,9 +155,9 @@ export function WeekDatePicker({
         })}
       </View>
 
-      {!canGoPrevious ? (
+      {!canGoPrevious || !canGoNext ? (
         <Text style={styles.dateLimitNotice}>
-          최근 3개월 식단까지만 조회할 수 있습니다.
+          오늘 기준 3개월 전부터 3개월 후까지 식단을 조회할 수 있습니다.
         </Text>
       ) : null}
     </View>
