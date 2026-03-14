@@ -63,12 +63,13 @@ function formatDateLabel(dateKey: string) {
   return dayFormatter.format(date);
 }
 
-function getDateStripDates(dateKey: string) {
+function getDateStripDates(dateKey: string, visibleDays: number) {
   const selectedDate = parseDateKey(dateKey);
   const startDate = new Date(selectedDate);
-  startDate.setDate(selectedDate.getDate() - 3);
+  const daysBeforeSelected = Math.floor(visibleDays / 2);
+  startDate.setDate(selectedDate.getDate() - daysBeforeSelected);
 
-  return Array.from({ length: 7 }, (_, index) => {
+  return Array.from({ length: visibleDays }, (_, index) => {
     const currentDate = new Date(startDate);
     currentDate.setDate(startDate.getDate() + index);
     return formatDateKey(currentDate);
@@ -114,12 +115,14 @@ function CampusToggle({
 function WeekDatePicker({
   dateKey,
   onChange,
+  compact,
 }: {
   dateKey: string;
   onChange: (dateKey: string) => void;
+  compact: boolean;
 }) {
   const todayKey = createTodayKey();
-  const dateStripDates = getDateStripDates(dateKey);
+  const dateStripDates = getDateStripDates(dateKey, compact ? 5 : 7);
   const isTodaySelected = dateKey === todayKey;
 
   return (
@@ -282,6 +285,7 @@ export default function App() {
   }, [campus, dateKey]);
 
   const isWideLayout = width >= 760;
+  const isCompactDatePicker = width < 520;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -298,7 +302,11 @@ export default function App() {
         </View>
 
         <View style={styles.contentCard}>
-          <WeekDatePicker dateKey={dateKey} onChange={setDateKey} />
+          <WeekDatePicker
+            dateKey={dateKey}
+            onChange={setDateKey}
+            compact={isCompactDatePicker}
+          />
 
           <View style={styles.contentDivider} />
 
