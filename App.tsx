@@ -25,6 +25,9 @@ const MEAL_LABELS: Record<MealType, string> = {
   dinner: "저녁",
 };
 
+const MENU_LOAD_ERROR_MESSAGE =
+  "현재 식단 정보를 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.";
+
 const dayFormatter = new Intl.DateTimeFormat("ko-KR", {
   month: "long",
   day: "numeric",
@@ -137,12 +140,12 @@ export default function App() {
         }
       } catch (loadError) {
         if (!cancelled) {
+          if (__DEV__) {
+            console.error("Failed to load menu:", loadError);
+          }
+
           setMenuDay(null);
-          setError(
-            loadError instanceof Error
-              ? loadError.message
-              : "식단을 불러오지 못했습니다.",
-          );
+          setError(MENU_LOAD_ERROR_MESSAGE);
         }
       } finally {
         if (!cancelled) {
@@ -225,15 +228,6 @@ export default function App() {
           </View>
         )}
 
-        <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>데이터 구조</Text>
-          <Text style={styles.infoText}>
-            `menu/{campus}/year_YYYY/month_MM` 문서에서 날짜별 필드를 읽습니다.
-          </Text>
-          <Text style={styles.infoText}>
-            예시: `eu20260314a`, `do20260314b`, `do20260314c`
-          </Text>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -407,21 +401,5 @@ const styles = StyleSheet.create({
   emptyMealText: {
     fontSize: 15,
     color: "#967262",
-  },
-  infoCard: {
-    backgroundColor: "#35140a",
-    borderRadius: 24,
-    padding: 20,
-    gap: 8,
-  },
-  infoTitle: {
-    color: "#fff3e6",
-    fontSize: 18,
-    fontWeight: "800",
-  },
-  infoText: {
-    color: "#eed9cc",
-    fontSize: 14,
-    lineHeight: 20,
   },
 });

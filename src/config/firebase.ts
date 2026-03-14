@@ -25,9 +25,11 @@ function getFirebaseConfig(): FirebaseConfig {
     .map(([key]) => key);
 
   if (missingKeys.length > 0) {
-    throw new Error(
-      `Firebase 환경 변수가 비어 있습니다: ${missingKeys.join(", ")}`,
-    );
+    if (__DEV__) {
+      console.error("Missing Firebase environment variables:", missingKeys);
+    }
+
+    throw new Error("Firebase configuration is unavailable.");
   }
 
   return config as FirebaseConfig;
