@@ -119,7 +119,6 @@ function WeekDatePicker({
   onChange: (dateKey: string) => void;
 }) {
   const todayKey = createTodayKey();
-  const tomorrowKey = shiftDate(todayKey, 1);
   const dateStripDates = getDateStripDates(dateKey);
 
   return (
@@ -134,42 +133,6 @@ function WeekDatePicker({
         </Pressable>
         <View style={styles.dateNavCenter}>
           <Text style={styles.dateValue}>{formatDateLabel(dateKey)}</Text>
-          <View style={styles.shortcutRow}>
-            <Pressable
-              onPress={() => onChange(todayKey)}
-              style={[
-                styles.todayButton,
-                dateKey === todayKey && styles.todayButtonActive,
-              ]}
-              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-            >
-              <Text
-                style={[
-                  styles.todayButtonText,
-                  dateKey === todayKey && styles.todayButtonTextActive,
-                ]}
-              >
-                오늘
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => onChange(tomorrowKey)}
-              style={[
-                styles.todayButton,
-                dateKey === tomorrowKey && styles.todayButtonActive,
-              ]}
-              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-            >
-              <Text
-                style={[
-                  styles.todayButtonText,
-                  dateKey === tomorrowKey && styles.todayButtonTextActive,
-                ]}
-              >
-                내일
-              </Text>
-            </Pressable>
-          </View>
         </View>
         <Pressable
           onPress={() => onChange(shiftDate(dateKey, 1))}
@@ -184,7 +147,6 @@ function WeekDatePicker({
         {dateStripDates.map((stripDateKey) => {
           const selected = stripDateKey === dateKey;
           const today = stripDateKey === todayKey;
-          const isTomorrow = stripDateKey === tomorrowKey;
           const dayOfWeek = parseDateKey(stripDateKey).getDay();
           const weekday = WEEKDAY_LABELS[dayOfWeek];
           const isSunday = dayOfWeek === 0;
@@ -219,15 +181,10 @@ function WeekDatePicker({
               >
                 {formatDayOfMonth(stripDateKey)}
               </Text>
-              {(today || isTomorrow) && (
-                <Text
-                  style={[
-                    styles.dayChipMeta,
-                    selected && styles.dayChipMetaActive,
-                  ]}
-                >
-                  {today ? "오늘" : "내일"}
-                </Text>
+              {today && (
+                <View
+                  style={[styles.todayDot, selected && styles.todayDotActive]}
+                />
               )}
             </Pressable>
           );
@@ -428,34 +385,12 @@ const styles = StyleSheet.create({
   dateNavCenter: {
     flex: 1,
     alignItems: "center",
-    gap: 6,
   },
   dateValue: {
     fontSize: 20,
     fontWeight: "800",
     color: "#2b140e",
     textAlign: "center",
-  },
-  todayButton: {
-    backgroundColor: "#f5ece4",
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  todayButtonActive: {
-    backgroundColor: "#b14d27",
-  },
-  todayButtonText: {
-    color: "#7a4e3c",
-    fontSize: 12,
-    fontWeight: "800",
-  },
-  todayButtonTextActive: {
-    color: "#fff",
-  },
-  shortcutRow: {
-    flexDirection: "row",
-    gap: 8,
   },
   weekNavButton: {
     width: 44,
@@ -517,14 +452,15 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: "#2d170f",
   },
-  dayChipMeta: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#b14d27",
+  todayDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: "#b14d27",
     marginTop: 1,
   },
-  dayChipMetaActive: {
-    color: "rgba(255,248,242,0.85)",
+  todayDotActive: {
+    backgroundColor: "rgba(255,248,242,0.8)",
   },
   dayChipTextActive: {
     color: "#fff8f2",
