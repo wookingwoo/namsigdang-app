@@ -358,11 +358,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   controlsPanel: {
-    backgroundColor: "#fffaf5",
-    borderRadius: 26,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#e6d5c5",
+    paddingHorizontal: 4,
   },
   contentCard: {
     backgroundColor: "#fffaf5",
