@@ -295,41 +295,47 @@ export default function App() {
       >
         <View style={styles.controlsPanel}>
           <CampusToggle campus={campus} onChange={setCampus} />
-
-          <WeekDatePicker dateKey={dateKey} onChange={setDateKey} />
         </View>
 
-        {loading ? (
-          <View style={styles.feedbackCard}>
-            <ActivityIndicator size="large" color="#b14d27" />
-            <Text style={styles.feedbackText}>식단을 불러오는 중입니다.</Text>
-          </View>
-        ) : error ? (
-          <View style={styles.feedbackCard}>
-            <Text style={styles.errorTitle}>데이터를 불러오지 못했습니다.</Text>
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        ) : (
-          <View style={[styles.menuPanel, isWideLayout && styles.menuPanelWide]}>
-            {(Object.keys(MEAL_LABELS) as MealType[]).map((mealType) => (
-              <View
-                key={mealType}
-                style={[
-                  isWideLayout && styles.mealSectionWide,
-                  mealType !== "dinner" &&
-                    (isWideLayout
-                      ? styles.mealSectionWideDivider
-                      : styles.mealSectionDivider),
-                ]}
-              >
-                <MealCard
-                  label={MEAL_LABELS[mealType]}
-                  items={menuDay?.[mealType] ?? []}
-                />
-              </View>
-            ))}
-          </View>
-        )}
+        <View style={styles.contentCard}>
+          <WeekDatePicker dateKey={dateKey} onChange={setDateKey} />
+
+          <View style={styles.contentDivider} />
+
+          {loading ? (
+            <View style={styles.feedbackCard}>
+              <ActivityIndicator size="large" color="#b14d27" />
+              <Text style={styles.feedbackText}>식단을 불러오는 중입니다.</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.feedbackCard}>
+              <Text style={styles.errorTitle}>데이터를 불러오지 못했습니다.</Text>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : (
+            <View
+              style={[styles.menuPanel, isWideLayout && styles.menuPanelWide]}
+            >
+              {(Object.keys(MEAL_LABELS) as MealType[]).map((mealType) => (
+                <View
+                  key={mealType}
+                  style={[
+                    isWideLayout && styles.mealSectionWide,
+                    mealType !== "dinner" &&
+                      (isWideLayout
+                        ? styles.mealSectionWideDivider
+                        : styles.mealSectionDivider),
+                  ]}
+                >
+                  <MealCard
+                    label={MEAL_LABELS[mealType]}
+                    items={menuDay?.[mealType] ?? []}
+                  />
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -357,7 +363,18 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: "#e6d5c5",
-    gap: 14,
+  },
+  contentCard: {
+    backgroundColor: "#fffaf5",
+    borderRadius: 26,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#e6d5c5",
+    gap: 16,
+  },
+  contentDivider: {
+    height: 1,
+    backgroundColor: "#ead9cd",
   },
   segmentedControl: {
     flexDirection: "row",
@@ -385,11 +402,8 @@ const styles = StyleSheet.create({
     color: "#fff8f2",
   },
   dateCard: {
-    backgroundColor: "#fff",
-    borderRadius: 22,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: "#e7d7c8",
+    paddingHorizontal: 2,
+    paddingVertical: 4,
     gap: 16,
   },
   dateNavRow: {
@@ -501,13 +515,11 @@ const styles = StyleSheet.create({
     color: "#fff8f2",
   },
   feedbackCard: {
-    backgroundColor: "#fff",
-    borderRadius: 22,
     padding: 24,
-    borderWidth: 1,
-    borderColor: "#ead7ca",
     alignItems: "center",
     gap: 12,
+    minHeight: 220,
+    justifyContent: "center",
   },
   feedbackText: {
     color: "#6d4836",
@@ -525,11 +537,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   menuPanel: {
-    backgroundColor: "#fff",
-    borderRadius: 22,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#ead7ca",
+    paddingVertical: 4,
   },
   menuPanelWide: {
     flexDirection: "row",
