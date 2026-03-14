@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
@@ -11,7 +12,6 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { getMenuByDate } from "./src/services/menu";
 import type { Campus, MealType, MenuDay } from "./src/types/menu";
@@ -82,6 +82,10 @@ function formatDayOfMonth(dateKey: string) {
   return `${parseDateKey(dateKey).getDate()}`;
 }
 
+function getCampusLabel(campus: Campus) {
+  return CAMPUS_OPTIONS.find((option) => option.value === campus)?.label ?? campus;
+}
+
 function isCampus(value: string): value is Campus {
   return CAMPUS_OPTIONS.some((option) => option.value === value);
 }
@@ -97,11 +101,16 @@ function CampusToggle({
     <View style={styles.segmentedControl}>
       {CAMPUS_OPTIONS.map((option) => {
         const selected = campus === option.value;
+
         return (
           <Pressable
             key={option.value}
             onPress={() => onChange(option.value)}
-            style={[styles.segmentButton, selected && styles.segmentButtonActive]}
+            style={({ pressed }) => [
+              styles.segmentButton,
+              selected && styles.segmentButtonActive,
+              pressed && !selected && styles.segmentButtonPressed,
+            ]}
           >
             <Text
               style={[
@@ -136,17 +145,25 @@ function WeekDatePicker({
       <View style={styles.dateNavRow}>
         <Pressable
           onPress={() => onChange(shiftDate(dateKey, -1))}
-          style={styles.weekNavButton}
+          style={({ pressed }) => [
+            styles.weekNavButton,
+            pressed && styles.weekNavButtonPressed,
+          ]}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <Text style={styles.weekNavArrow}>‹</Text>
         </Pressable>
+
         <View style={styles.dateNavCenter}>
           <Text style={styles.dateValue}>{formatDateLabel(dateKey)}</Text>
         </View>
+
         <Pressable
           onPress={() => onChange(shiftDate(dateKey, 1))}
-          style={styles.weekNavButton}
+          style={({ pressed }) => [
+            styles.weekNavButton,
+            pressed && styles.weekNavButtonPressed,
+          ]}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <Text style={styles.weekNavArrow}>›</Text>
@@ -221,18 +238,23 @@ function WeekDatePicker({
 function MealCard({
   label,
   items,
+  stretch,
 }: {
   label: string;
   items: string[];
+  stretch?: boolean;
 }) {
   return (
-    <View style={styles.mealSection}>
+    <View style={[styles.mealCard, stretch && styles.mealCardStretch]}>
       <View style={styles.mealHeader}>
-        <Text style={styles.mealLabel}>{label}</Text>
+        <View style={styles.mealBadge}>
+          <Text style={styles.mealBadgeText}>{label}</Text>
+        </View>
         <Text style={styles.mealMeta}>
           {items.length > 0 ? `${items.length}개 메뉴` : "미등록"}
         </Text>
       </View>
+
       {items.length > 0 ? (
         items.map((item) => (
           <View key={`${label}-${item}`} style={styles.menuItemRow}>
@@ -241,7 +263,9 @@ function MealCard({
           </View>
         ))
       ) : (
-        <Text style={styles.emptyMealText}>등록된 식단이 없습니다.</Text>
+        <View style={styles.emptyMealCard}>
+          <Text style={styles.emptyMealText}>등록된 식단이 없습니다.</Text>
+        </View>
       )}
     </View>
   );
@@ -344,14 +368,16 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [campus, dateKey]);
+  }, [campus, dateKey, isCampusHydrated]);
 
   const isWideLayout = width >= 760;
   const isCompactDatePicker = width < 520;
+  const campusLabel = campus ? getCampusLabel(campus) : null;
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
@@ -359,26 +385,29 @@ export default function App() {
           isWideLayout && styles.containerWide,
         ]}
       >
-        <View style={styles.controlsPanel}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>남식당 식단</Text>
+          {campusLabel ? <Text style={styles.headerSubtitle}>{campusLabel}</Text> : null}
+        </View>
+
+        <View style={styles.surfaceCard}>
           {campus ? (
             <CampusToggle campus={campus} onChange={setCampus} />
           ) : (
             <View style={styles.controlsPlaceholder} />
           )}
-        </View>
 
-        <View style={styles.contentCard}>
           <WeekDatePicker
             dateKey={dateKey}
             onChange={setDateKey}
             compact={isCompactDatePicker}
           />
+        </View>
 
-          <View style={styles.contentDivider} />
-
+        <View style={styles.surfaceCard}>
           {loading ? (
             <View style={styles.feedbackCard}>
-              <ActivityIndicator size="large" color="#b14d27" />
+              <ActivityIndicator size="large" color="#2b6fe8" />
               <Text style={styles.feedbackText}>식단을 불러오는 중입니다.</Text>
             </View>
           ) : error ? (
@@ -387,26 +416,19 @@ export default function App() {
               <Text style={styles.errorText}>{error}</Text>
             </View>
           ) : (
-            <View
-              style={[styles.menuPanel, isWideLayout && styles.menuPanelWide]}
-            >
+            <View style={[styles.menuGrid, isWideLayout && styles.menuGridWide]}>
               {(Object.keys(MEAL_LABELS) as MealType[]).map((mealType) => (
-                <View
-                  key={mealType}
-                  style={[
-                    isWideLayout && styles.mealSectionWide,
-                    mealType !== "dinner" &&
-                      (isWideLayout
-                        ? styles.mealSectionWideDivider
-                        : styles.mealSectionDivider),
-                  ]}
-                >
-                  <MealCard
-                    label={MEAL_LABELS[mealType]}
-                    items={menuDay?.[mealType] ?? []}
-                  />
-                </View>
-              ))}
+                  <View
+                    key={mealType}
+                    style={[styles.mealCardWrap, isWideLayout && styles.mealCardWrapWide]}
+                  >
+                    <MealCard
+                      label={MEAL_LABELS[mealType]}
+                      items={menuDay?.[mealType] ?? []}
+                      stretch={isWideLayout}
+                    />
+                  </View>
+                ))}
             </View>
           )}
         </View>
@@ -418,256 +440,297 @@ export default function App() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f4ede5",
+    backgroundColor: "#eaf2ff",
   },
   container: {
     paddingHorizontal: 16,
     paddingTop: Platform.OS === "web" ? 28 : 12,
-    paddingBottom: 24,
-    gap: 14,
+    paddingBottom: 28,
+    gap: 16,
   },
   containerWide: {
     width: "100%",
-    maxWidth: 920,
+    maxWidth: 860,
     alignSelf: "center",
   },
-  controlsPanel: {
+  header: {
     paddingHorizontal: 4,
+    paddingTop: 6,
+    gap: 4,
   },
-  controlsPlaceholder: {
-    height: 58,
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "900",
+    color: "#0f2d5e",
   },
-  contentCard: {
-    backgroundColor: "#fffaf5",
-    borderRadius: 26,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#e6d5c5",
-    gap: 16,
-  },
-  contentDivider: {
-    height: 1,
-    backgroundColor: "#ead9cd",
+  headerSubtitle: {
+    fontSize: 14,
+    color: "#5f7da9",
   },
   segmentedControl: {
     flexDirection: "row",
-    backgroundColor: "#efe2d5",
-    borderRadius: 18,
-    padding: 5,
-    gap: 6,
+    backgroundColor: "#edf4ff",
+    borderRadius: 20,
+    padding: 6,
+    gap: 8,
   },
   segmentButton: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 12,
-    borderRadius: 14,
+    paddingVertical: 13,
+    borderRadius: 15,
   },
   segmentButtonActive: {
-    backgroundColor: "#b14d27",
+    backgroundColor: "#2b6fe8",
+  },
+  segmentButtonPressed: {
+    backgroundColor: "#dceaff",
   },
   segmentButtonText: {
     fontSize: 15,
-    fontWeight: "700",
-    color: "#6f4330",
+    fontWeight: "800",
+    color: "#4e6f9e",
   },
   segmentButtonTextActive: {
-    color: "#fff8f2",
+    color: "#f5f9ff",
+  },
+  controlsPlaceholder: {
+    height: 58,
+  },
+  surfaceCard: {
+    backgroundColor: "#fafdff",
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: "#d8e7ff",
+    padding: 16,
+    gap: 16,
+    shadowColor: "#7ca9e8",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 22,
+    elevation: 2,
+  },
+  sectionHeader: {
+    gap: 12,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#0f2d5e",
   },
   dateCard: {
-    paddingHorizontal: 2,
-    paddingVertical: 4,
     gap: 16,
   },
   dateNavRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 10,
   },
   dateNavCenter: {
     flex: 1,
     alignItems: "center",
   },
   dateValue: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#2b140e",
+    fontSize: 22,
+    fontWeight: "900",
+    color: "#12356b",
     textAlign: "center",
   },
   weekNavButton: {
-    width: 44,
-    height: 44,
-    backgroundColor: "#f5ece4",
+    width: 46,
+    height: 46,
     borderRadius: 999,
+    backgroundColor: "#edf4ff",
+    borderWidth: 1,
+    borderColor: "#d4e4ff",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
   },
+  weekNavButtonPressed: {
+    backgroundColor: "#dceaff",
+  },
   weekNavArrow: {
     fontSize: 28,
-    lineHeight: 34,
-    color: "#714634",
+    lineHeight: 32,
+    color: "#1958b7",
     fontWeight: "400",
     marginTop: -2,
   },
   todayShortcutRow: {
     alignItems: "flex-end",
-    marginTop: -6,
   },
   todayShortcutButton: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 13,
     paddingVertical: 8,
     borderRadius: 999,
-    backgroundColor: "#fff4ee",
+    backgroundColor: "#edf4ff",
     borderWidth: 1,
-    borderColor: "#e5b8a4",
+    borderColor: "#cfe0ff",
   },
   todayShortcutButtonPressed: {
-    backgroundColor: "#f8e7dd",
+    backgroundColor: "#dceaff",
   },
   todayShortcutText: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#a44925",
+    color: "#1a58ba",
   },
   weekRow: {
     flexDirection: "row",
-    gap: 5,
+    gap: 6,
   },
   dayChip: {
     flex: 1,
     minWidth: 0,
-    backgroundColor: "#fbf3ec",
-    borderRadius: 16,
+    minHeight: 74,
+    backgroundColor: "#f6faff",
+    borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: "#ead9cd",
+    borderColor: "#d8e7ff",
     paddingVertical: 12,
     alignItems: "center",
-    gap: 3,
-    minHeight: 70,
     justifyContent: "center",
+    gap: 4,
   },
   dayChipToday: {
-    borderColor: "#b14d27",
-    backgroundColor: "#fff4ee",
+    backgroundColor: "#edf4ff",
+    borderColor: "#8fb8ff",
   },
   dayChipActive: {
-    backgroundColor: "#b14d27",
-    borderColor: "#b14d27",
+    backgroundColor: "#2b6fe8",
+    borderColor: "#2b6fe8",
   },
   dayChipPressed: {
-    backgroundColor: "#f0e0d6",
+    backgroundColor: "#e7f0ff",
   },
   dayChipWeekday: {
     fontSize: 12,
-    fontWeight: "700",
-    color: "#8f624d",
+    fontWeight: "800",
+    color: "#6c84ab",
   },
   dayChipSunday: {
-    color: "#c0392b",
+    color: "#cf4d5c",
   },
   dayChipSaturday: {
-    color: "#2980b9",
+    color: "#2d74d7",
   },
   dayChipDate: {
     fontSize: 18,
-    fontWeight: "800",
-    color: "#2d170f",
-  },
-  todayDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 999,
-    backgroundColor: "#b14d27",
-    marginTop: 1,
-  },
-  todayDotActive: {
-    backgroundColor: "rgba(255,248,242,0.8)",
+    fontWeight: "900",
+    color: "#143466",
   },
   dayChipTextActive: {
-    color: "#fff8f2",
+    color: "#f5f9ff",
+  },
+  todayDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: "#2b6fe8",
+    marginTop: 2,
+  },
+  todayDotActive: {
+    backgroundColor: "rgba(245, 249, 255, 0.88)",
   },
   feedbackCard: {
-    padding: 24,
+    minHeight: 240,
     alignItems: "center",
-    gap: 12,
-    minHeight: 220,
     justifyContent: "center",
+    gap: 12,
+    padding: 24,
+    borderRadius: 20,
+    backgroundColor: "#f4f8ff",
   },
   feedbackText: {
-    color: "#6d4836",
     fontSize: 15,
+    color: "#5d759d",
   },
   errorTitle: {
     fontSize: 18,
-    fontWeight: "800",
-    color: "#5d1b14",
+    fontWeight: "900",
+    color: "#193b72",
+    textAlign: "center",
   },
   errorText: {
     fontSize: 15,
     lineHeight: 22,
-    color: "#7b3b34",
+    color: "#5e759f",
     textAlign: "center",
   },
-  menuPanel: {
-    paddingVertical: 4,
+  menuGrid: {
+    gap: 12,
   },
-  menuPanelWide: {
+  menuGridWide: {
     flexDirection: "row",
+    alignItems: "stretch",
   },
-  mealSection: {
-    gap: 10,
+  mealCardWrap: {
+    width: "100%",
   },
-  mealSectionDivider: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0e1d5",
-    marginBottom: 14,
-    paddingBottom: 14,
-  },
-  mealSectionWide: {
+  mealCardWrapWide: {
     flex: 1,
   },
-  mealSectionWideDivider: {
-    borderRightWidth: 1,
-    borderRightColor: "#f0e1d5",
-    marginRight: 14,
-    paddingRight: 14,
+  mealCard: {
+    backgroundColor: "#f4f8ff",
+    borderColor: "#d8e7ff",
+    borderRadius: 22,
+    borderWidth: 1,
+    padding: 16,
+    gap: 12,
+  },
+  mealCardStretch: {
+    height: "100%",
   },
   mealHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: 10,
   },
-  mealLabel: {
-    fontSize: 19,
-    fontWeight: "800",
-    color: "#2b140e",
+  mealBadge: {
+    backgroundColor: "#dceaff",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+  },
+  mealBadgeText: {
+    fontSize: 13,
+    fontWeight: "900",
+    color: "#1b58b8",
   },
   mealMeta: {
     fontSize: 12,
-    fontWeight: "700",
-    color: "#9a725d",
+    fontWeight: "800",
+    color: "#6e86ab",
   },
   menuItemRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 8,
+    gap: 9,
   },
   menuBullet: {
-    width: 6,
-    height: 6,
+    width: 7,
+    height: 7,
     borderRadius: 999,
-    backgroundColor: "#b14d27",
-    marginTop: 7,
+    backgroundColor: "#2b6fe8",
+    marginTop: 8,
   },
   menuItemText: {
     flex: 1,
     fontSize: 15,
     lineHeight: 22,
-    color: "#5c3c31",
+    color: "#21406d",
+  },
+  emptyMealCard: {
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    backgroundColor: "rgba(255, 255, 255, 0.62)",
   },
   emptyMealText: {
     fontSize: 14,
-    color: "#967262",
+    color: "#6f86a7",
   },
 });
