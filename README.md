@@ -43,6 +43,8 @@ npm install
 
 Firebase 설정값을 어디서 복사해야 하는지 자세한 절차는 [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) 를 참고하면 됩니다.
 
+Firebase Hosting으로 웹 배포하는 절차는 [FIREBASE_DEPLOY.md](./FIREBASE_DEPLOY.md) 를 참고하면 됩니다.
+
 3. 개발 서버 실행
 
 ```bash
