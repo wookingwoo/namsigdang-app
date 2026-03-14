@@ -120,6 +120,7 @@ function WeekDatePicker({
 }) {
   const todayKey = createTodayKey();
   const dateStripDates = getDateStripDates(dateKey);
+  const isTodaySelected = dateKey === todayKey;
 
   return (
     <View style={styles.dateCard}>
@@ -142,6 +143,20 @@ function WeekDatePicker({
           <Text style={styles.weekNavArrow}>›</Text>
         </Pressable>
       </View>
+
+      {!isTodaySelected && (
+        <View style={styles.todayShortcutRow}>
+          <Pressable
+            onPress={() => onChange(todayKey)}
+            style={({ pressed }) => [
+              styles.todayShortcutButton,
+              pressed && styles.todayShortcutButtonPressed,
+            ]}
+          >
+            <Text style={styles.todayShortcutText}>오늘로 이동</Text>
+          </Pressable>
+        </View>
+      )}
 
       <View style={styles.weekRow}>
         {dateStripDates.map((stripDateKey) => {
@@ -407,6 +422,26 @@ const styles = StyleSheet.create({
     color: "#714634",
     fontWeight: "400",
     marginTop: -2,
+  },
+  todayShortcutRow: {
+    alignItems: "flex-end",
+    marginTop: -6,
+  },
+  todayShortcutButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: "#fff4ee",
+    borderWidth: 1,
+    borderColor: "#e5b8a4",
+  },
+  todayShortcutButtonPressed: {
+    backgroundColor: "#f8e7dd",
+  },
+  todayShortcutText: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#a44925",
   },
   weekRow: {
     flexDirection: "row",
