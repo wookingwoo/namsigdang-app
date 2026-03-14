@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -8,6 +8,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 
@@ -33,6 +34,7 @@ const dayFormatter = new Intl.DateTimeFormat("ko-KR", {
   day: "numeric",
   weekday: "long",
 });
+const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 
 function createTodayKey() {
   return formatDateKey(new Date());
@@ -59,6 +61,35 @@ function formatDateKey(date: Date) {
 function formatDateLabel(dateKey: string) {
   const date = parseDateKey(dateKey);
   return dayFormatter.format(date);
+}
+
+function getWeekDates(dateKey: string) {
+  const selectedDate = parseDateKey(dateKey);
+  const startDate = new Date(selectedDate);
+  startDate.setDate(selectedDate.getDate() - selectedDate.getDay());
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const currentDate = new Date(startDate);
+    currentDate.setDate(startDate.getDate() + index);
+    return formatDateKey(currentDate);
+  });
+}
+
+function formatWeekRange(dateKeys: string[]) {
+  const startDate = parseDateKey(dateKeys[0]);
+  const endDate = parseDateKey(dateKeys[dateKeys.length - 1]);
+  const startMonth = startDate.getMonth() + 1;
+  const endMonth = endDate.getMonth() + 1;
+
+  if (startMonth === endMonth) {
+    return `${startMonth}월 ${startDate.getDate()}-${endDate.getDate()}일`;
+  }
+
+  return `${startMonth}월 ${startDate.getDate()}일 - ${endMonth}월 ${endDate.getDate()}일`;
+}
+
+function formatDayOfMonth(dateKey: string) {
+  return `${parseDateKey(dateKey).getDate()}`;
 }
 
 function CampusToggle({
@@ -93,6 +124,93 @@ function CampusToggle({
   );
 }
 
+function WeekDatePicker({
+  dateKey,
+  onChange,
+}: {
+  dateKey: string;
+  onChange: (dateKey: string) => void;
+}) {
+  const todayKey = createTodayKey();
+  const weekDates = getWeekDates(dateKey);
+
+  return (
+    <View style={styles.dateCard}>
+      <View style={styles.dateHeader}>
+        <View style={styles.dateHeaderText}>
+          <Text style={styles.dateLabel}>날짜</Text>
+          <Text style={styles.dateValue}>{formatDateLabel(dateKey)}</Text>
+        </View>
+        {dateKey !== todayKey ? (
+          <Pressable
+            onPress={() => onChange(todayKey)}
+            style={styles.todayShortcut}
+          >
+            <Text style={styles.todayShortcutText}>오늘</Text>
+          </Pressable>
+        ) : (
+          <View style={styles.todayBadge}>
+            <Text style={styles.todayBadgeText}>오늘</Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.weekControlRow}>
+        <Pressable
+          onPress={() => onChange(shiftDate(dateKey, -7))}
+          style={styles.weekNavButton}
+        >
+          <Text style={styles.weekNavButtonText}>이전 주</Text>
+        </Pressable>
+        <Text style={styles.weekRangeText}>{formatWeekRange(weekDates)}</Text>
+        <Pressable
+          onPress={() => onChange(shiftDate(dateKey, 7))}
+          style={styles.weekNavButton}
+        >
+          <Text style={styles.weekNavButtonText}>다음 주</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.weekRow}>
+        {weekDates.map((weekDateKey) => {
+          const selected = weekDateKey === dateKey;
+          const today = weekDateKey === todayKey;
+          const weekday = WEEKDAY_LABELS[parseDateKey(weekDateKey).getDay()];
+
+          return (
+            <Pressable
+              key={weekDateKey}
+              onPress={() => onChange(weekDateKey)}
+              style={[
+                styles.dayChip,
+                selected && styles.dayChipActive,
+                today && !selected && styles.dayChipToday,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.dayChipWeekday,
+                  selected && styles.dayChipTextActive,
+                ]}
+              >
+                {weekday}
+              </Text>
+              <Text
+                style={[
+                  styles.dayChipDate,
+                  selected && styles.dayChipTextActive,
+                ]}
+              >
+                {formatDayOfMonth(weekDateKey)}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 function MealCard({
   label,
   items,
@@ -101,9 +219,12 @@ function MealCard({
   items: string[];
 }) {
   return (
-    <View style={styles.mealCard}>
+    <View style={styles.mealSection}>
       <View style={styles.mealHeader}>
         <Text style={styles.mealLabel}>{label}</Text>
+        <Text style={styles.mealMeta}>
+          {items.length > 0 ? `${items.length}개 메뉴` : "미등록"}
+        </Text>
       </View>
       {items.length > 0 ? (
         items.map((item) => (
@@ -120,6 +241,7 @@ function MealCard({
 }
 
 export default function App() {
+  const { width } = useWindowDimensions();
   const [campus, setCampus] = useState<Campus>("Eunpyeong");
   const [dateKey, setDateKey] = useState(createTodayKey);
   const [menuDay, setMenuDay] = useState<MenuDay | null>(null);
@@ -161,49 +283,25 @@ export default function App() {
     };
   }, [campus, dateKey]);
 
-  const campusName = useMemo(() => {
-    return CAMPUS_OPTIONS.find((option) => option.value === campus)?.label ?? campus;
-  }, [campus]);
+  const isWideLayout = width >= 760;
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.hero}>
-          <Text style={styles.kicker}>남도학숙 식단 서비스</Text>
-          <Text style={styles.title}>남식당</Text>
-          <Text style={styles.subtitle}>
-            {campusName} 식단을 빠르고 편하게 확인하세요.
-          </Text>
-        </View>
-
-        <CampusToggle campus={campus} onChange={setCampus} />
-
-        <View style={styles.dateCard}>
-          <Text style={styles.dateLabel}>선택한 날짜</Text>
-          <Text style={styles.dateValue}>{formatDateLabel(dateKey)}</Text>
-          <View style={styles.dateActions}>
-            <Pressable
-              onPress={() => setDateKey((current) => shiftDate(current, -1))}
-              style={styles.dateButton}
-            >
-              <Text style={styles.dateButtonText}>이전 날</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setDateKey(createTodayKey())}
-              style={[styles.dateButton, styles.dateButtonPrimary]}
-            >
-              <Text style={[styles.dateButtonText, styles.dateButtonPrimaryText]}>
-                오늘
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setDateKey((current) => shiftDate(current, 1))}
-              style={styles.dateButton}
-            >
-              <Text style={styles.dateButtonText}>다음 날</Text>
-            </Pressable>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.container,
+          isWideLayout && styles.containerWide,
+        ]}
+      >
+        <View style={styles.controlsPanel}>
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>캠퍼스</Text>
+            <CampusToggle campus={campus} onChange={setCampus} />
           </View>
+
+          <WeekDatePicker dateKey={dateKey} onChange={setDateKey} />
         </View>
 
         {loading ? (
@@ -217,17 +315,26 @@ export default function App() {
             <Text style={styles.errorText}>{error}</Text>
           </View>
         ) : (
-          <View style={styles.mealsWrapper}>
+          <View style={[styles.menuPanel, isWideLayout && styles.menuPanelWide]}>
             {(Object.keys(MEAL_LABELS) as MealType[]).map((mealType) => (
-              <MealCard
+              <View
                 key={mealType}
-                label={MEAL_LABELS[mealType]}
-                items={menuDay?.[mealType] ?? []}
-              />
+                style={[
+                  isWideLayout && styles.mealSectionWide,
+                  mealType !== "dinner" &&
+                    (isWideLayout
+                      ? styles.mealSectionWideDivider
+                      : styles.mealSectionDivider),
+                ]}
+              >
+                <MealCard
+                  label={MEAL_LABELS[mealType]}
+                  items={menuDay?.[mealType] ?? []}
+                />
+              </View>
             ))}
           </View>
         )}
-
       </ScrollView>
     </SafeAreaView>
   );
@@ -236,51 +343,48 @@ export default function App() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f6efe7",
+    backgroundColor: "#f4ede5",
   },
   container: {
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === "web" ? 36 : 16,
-    paddingBottom: 40,
-    gap: 18,
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === "web" ? 28 : 12,
+    paddingBottom: 24,
+    gap: 14,
   },
-  hero: {
-    backgroundColor: "#fff7ef",
-    borderRadius: 28,
-    padding: 24,
+  containerWide: {
+    width: "100%",
+    maxWidth: 920,
+    alignSelf: "center",
+  },
+  controlsPanel: {
+    backgroundColor: "#fffaf5",
+    borderRadius: 26,
+    padding: 16,
     borderWidth: 1,
-    borderColor: "#e7cfbd",
+    borderColor: "#e6d5c5",
+    gap: 14,
   },
-  kicker: {
+  fieldGroup: {
+    gap: 10,
+  },
+  fieldLabel: {
     fontSize: 13,
-    color: "#a2603c",
-    marginBottom: 8,
-    fontWeight: "700",
-  },
-  title: {
-    fontSize: 38,
-    color: "#35140a",
     fontWeight: "800",
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: "#68473b",
+    color: "#9a5d3b",
   },
   segmentedControl: {
     flexDirection: "row",
-    backgroundColor: "#f0dfd0",
-    borderRadius: 20,
-    padding: 6,
-    gap: 8,
+    backgroundColor: "#efe2d5",
+    borderRadius: 18,
+    padding: 5,
+    gap: 6,
   },
   segmentButton: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 14,
-    borderRadius: 16,
+    paddingVertical: 12,
+    borderRadius: 14,
   },
   segmentButtonActive: {
     backgroundColor: "#b14d27",
@@ -288,57 +392,127 @@ const styles = StyleSheet.create({
   segmentButtonText: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#764832",
+    color: "#6f4330",
   },
   segmentButtonTextActive: {
-    color: "#fff9f4",
+    color: "#fff8f2",
   },
   dateCard: {
     backgroundColor: "#fff",
-    borderRadius: 24,
-    padding: 20,
+    borderRadius: 22,
+    padding: 16,
     borderWidth: 1,
-    borderColor: "#ead7ca",
+    borderColor: "#e7d7c8",
+    gap: 14,
+  },
+  dateHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
     gap: 12,
+  },
+  dateHeaderText: {
+    gap: 6,
   },
   dateLabel: {
     fontSize: 13,
-    fontWeight: "700",
-    color: "#a2603c",
+    fontWeight: "800",
+    color: "#9a5d3b",
   },
   dateValue: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "800",
     color: "#2b140e",
   },
-  dateActions: {
+  todayShortcut: {
+    backgroundColor: "#35140a",
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  todayShortcutText: {
+    color: "#fff6ef",
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  todayBadge: {
+    backgroundColor: "#f4e1d4",
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  todayBadgeText: {
+    color: "#8a5237",
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  weekControlRow: {
     flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     gap: 8,
   },
-  dateButton: {
-    flex: 1,
+  weekNavButton: {
     borderWidth: 1,
-    borderColor: "#d6bbaa",
+    borderColor: "#dcc4b4",
     backgroundColor: "#fff8f2",
-    paddingVertical: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderRadius: 14,
     alignItems: "center",
   },
-  dateButtonPrimary: {
-    backgroundColor: "#35140a",
-    borderColor: "#35140a",
+  weekNavButtonText: {
+    color: "#714634",
+    fontSize: 13,
+    fontWeight: "800",
   },
-  dateButtonText: {
-    color: "#6d4836",
+  weekRangeText: {
+    flex: 1,
+    textAlign: "center",
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#5c3728",
+  },
+  weekRow: {
+    flexDirection: "row",
+    gap: 6,
+  },
+  dayChip: {
+    flex: 1,
+    minWidth: 0,
+    backgroundColor: "#fbf3ec",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#ead9cd",
+    paddingVertical: 10,
+    alignItems: "center",
+    gap: 4,
+  },
+  dayChipToday: {
+    borderColor: "#b14d27",
+    backgroundColor: "#fff2e8",
+  },
+  dayChipActive: {
+    backgroundColor: "#b14d27",
+    borderColor: "#b14d27",
+  },
+  dayChipWeekday: {
+    fontSize: 12,
     fontWeight: "700",
+    color: "#8f624d",
   },
-  dateButtonPrimaryText: {
-    color: "#fff6ef",
+  dayChipDate: {
+    fontSize: 17,
+    fontWeight: "800",
+    color: "#2d170f",
+  },
+  dayChipTextActive: {
+    color: "#fff8f2",
   },
   feedbackCard: {
     backgroundColor: "#fff",
-    borderRadius: 24,
-    padding: 28,
+    borderRadius: 22,
+    padding: 24,
     borderWidth: 1,
     borderColor: "#ead7ca",
     alignItems: "center",
@@ -359,16 +533,33 @@ const styles = StyleSheet.create({
     color: "#7b3b34",
     textAlign: "center",
   },
-  mealsWrapper: {
-    gap: 14,
-  },
-  mealCard: {
+  menuPanel: {
     backgroundColor: "#fff",
-    borderRadius: 24,
-    padding: 20,
+    borderRadius: 22,
+    padding: 16,
     borderWidth: 1,
     borderColor: "#ead7ca",
-    gap: 12,
+  },
+  menuPanelWide: {
+    flexDirection: "row",
+  },
+  mealSection: {
+    gap: 10,
+  },
+  mealSectionDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0e1d5",
+    marginBottom: 14,
+    paddingBottom: 14,
+  },
+  mealSectionWide: {
+    flex: 1,
+  },
+  mealSectionWideDivider: {
+    borderRightWidth: 1,
+    borderRightColor: "#f0e1d5",
+    marginRight: 14,
+    paddingRight: 14,
   },
   mealHeader: {
     flexDirection: "row",
@@ -376,30 +567,35 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   mealLabel: {
-    fontSize: 21,
+    fontSize: 19,
     fontWeight: "800",
     color: "#2b140e",
+  },
+  mealMeta: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#9a725d",
   },
   menuItemRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 10,
+    gap: 8,
   },
   menuBullet: {
-    width: 7,
-    height: 7,
+    width: 6,
+    height: 6,
     borderRadius: 999,
     backgroundColor: "#b14d27",
     marginTop: 7,
   },
   menuItemText: {
     flex: 1,
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 15,
+    lineHeight: 22,
     color: "#5c3c31",
   },
   emptyMealText: {
-    fontSize: 15,
+    fontSize: 14,
     color: "#967262",
   },
 });
