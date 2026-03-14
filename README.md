@@ -41,6 +41,8 @@ npm install
 
 `.env.example`을 참고해 `.env` 파일을 만들고 Firebase Web App 설정값을 채웁니다.
 
+Firebase 설정값을 어디서 복사해야 하는지 자세한 절차는 [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) 를 참고하면 됩니다.
+
 3. 개발 서버 실행
 
 ```bash
