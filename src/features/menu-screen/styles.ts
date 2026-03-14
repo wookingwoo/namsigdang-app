@@ -19,15 +19,36 @@ export const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 4,
     paddingTop: 6,
-    gap: 4,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  headerIconWrap: {
+    width: 46,
+    height: 46,
+    borderRadius: 999,
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  headerIconImage: {
+    width: "100%",
+    height: "100%",
   },
   headerTitle: {
-    fontSize: 28,
+    flex: 1,
+    fontSize: 26,
+    lineHeight: 34,
     fontWeight: "900",
     color: "#0f2d5e",
   },
-  headerSubtitle: {
-    fontSize: 14,
+  headerTitleMeta: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: "700",
     color: "#5f7da9",
   },
   segmentedControl: {

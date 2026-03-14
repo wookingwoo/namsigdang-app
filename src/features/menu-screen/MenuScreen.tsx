@@ -1,6 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import {
   ActivityIndicator,
+  Image,
   SafeAreaView,
   ScrollView,
   Text,
@@ -10,7 +11,7 @@ import {
 
 import { MealCard } from "./MealCard";
 import { CampusToggle } from "./CampusToggle";
-import { MEAL_LABELS, MEAL_TYPES, getCampusLabel } from "./constants";
+import { MEAL_LABELS, MEAL_TYPES } from "./constants";
 import { WeekDatePicker } from "./WeekDatePicker";
 import { styles } from "./styles";
 import { useMenuScreen } from "./useMenuScreen";
@@ -22,7 +23,6 @@ export function MenuScreen() {
 
   const isWideLayout = width >= 760;
   const isCompactDatePicker = width < 520;
-  const campusLabel = campus ? getCampusLabel(campus) : null;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -36,10 +36,18 @@ export function MenuScreen() {
         ]}
       >
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>남식당 식단</Text>
-          {campusLabel ? (
-            <Text style={styles.headerSubtitle}>{campusLabel}</Text>
-          ) : null}
+          <View style={styles.headerRow}>
+            <View style={styles.headerIconWrap}>
+              <Image
+                source={require("../../../assets/favicon.png")}
+                style={styles.headerIconImage}
+              />
+            </View>
+            <Text style={styles.headerTitle}>
+              남식당{" "}
+              <Text style={styles.headerTitleMeta}>(남도학숙 식단정보)</Text>
+            </Text>
+          </View>
         </View>
 
         <View style={styles.surfaceCard}>
