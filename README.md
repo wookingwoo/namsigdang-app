@@ -11,7 +11,7 @@
 
 ## Firestore 구조
 
-`menu` 컬렉션 아래에 `Dongjak`, `Eunpyeon` 문서가 있고, 각 문서 아래 연도별 서브컬렉션과 월별 문서가 있다고 가정합니다.
+`menu` 컬렉션 아래에 `Dongjak`, `Eunpyeong` 문서가 있고, 각 문서 아래 연도별 서브컬렉션과 월별 문서가 있다고 가정합니다.
 
 ```text
 menu
@@ -21,7 +21,7 @@ menu
         do20260314a: "..."
         do20260314b: "..."
         do20260314c: "..."
-  Eunpyeon
+  Eunpyeong
     year_2026
       month_03
         eu20260314a: "..."

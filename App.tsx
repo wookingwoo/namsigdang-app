@@ -15,7 +15,7 @@ import { getMenuByDate } from "./src/services/menu";
 import type { Campus, MealType, MenuDay } from "./src/types/menu";
 
 const CAMPUS_OPTIONS: Array<{ label: string; value: Campus }> = [
-  { label: "은평관", value: "Eunpyeon" },
+  { label: "은평관", value: "Eunpyeong" },
   { label: "동작관", value: "Dongjak" },
 ];
 
@@ -117,7 +117,7 @@ function MealCard({
 }
 
 export default function App() {
-  const [campus, setCampus] = useState<Campus>("Eunpyeon");
+  const [campus, setCampus] = useState<Campus>("Eunpyeong");
   const [dateKey, setDateKey] = useState(createTodayKey);
   const [menuDay, setMenuDay] = useState<MenuDay | null>(null);
   const [loading, setLoading] = useState(true);

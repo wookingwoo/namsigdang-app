@@ -1,4 +1,4 @@
-export type Campus = "Dongjak" | "Eunpyeon";
+export type Campus = "Dongjak" | "Eunpyeong";
 
 export type MealType = "breakfast" | "lunch" | "dinner";
 
