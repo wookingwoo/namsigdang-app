@@ -75,18 +75,6 @@ function getWeekDates(dateKey: string) {
   });
 }
 
-function formatWeekRange(dateKeys: string[]) {
-  const startDate = parseDateKey(dateKeys[0]);
-  const endDate = parseDateKey(dateKeys[dateKeys.length - 1]);
-  const startMonth = startDate.getMonth() + 1;
-  const endMonth = endDate.getMonth() + 1;
-
-  if (startMonth === endMonth) {
-    return `${startMonth}월 ${startDate.getDate()}-${endDate.getDate()}일`;
-  }
-
-  return `${startMonth}월 ${startDate.getDate()}일 - ${endMonth}월 ${endDate.getDate()}일`;
-}
 
 function formatDayOfMonth(dateKey: string) {
   return `${parseDateKey(dateKey).getDate()}`;
@@ -133,41 +121,36 @@ function WeekDatePicker({
 }) {
   const todayKey = createTodayKey();
   const weekDates = getWeekDates(dateKey);
+  const isToday = dateKey === todayKey;
 
   return (
     <View style={styles.dateCard}>
-      <View style={styles.dateHeader}>
-        <View style={styles.dateHeaderText}>
-          <Text style={styles.dateLabel}>날짜</Text>
-          <Text style={styles.dateValue}>{formatDateLabel(dateKey)}</Text>
-        </View>
-        {dateKey !== todayKey ? (
-          <Pressable
-            onPress={() => onChange(todayKey)}
-            style={styles.todayShortcut}
-          >
-            <Text style={styles.todayShortcutText}>오늘</Text>
-          </Pressable>
-        ) : (
-          <View style={styles.todayBadge}>
-            <Text style={styles.todayBadgeText}>오늘</Text>
-          </View>
-        )}
-      </View>
-
-      <View style={styles.weekControlRow}>
+      <View style={styles.dateNavRow}>
         <Pressable
           onPress={() => onChange(shiftDate(dateKey, -7))}
           style={styles.weekNavButton}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={styles.weekNavButtonText}>이전 주</Text>
+          <Text style={styles.weekNavArrow}>‹</Text>
         </Pressable>
-        <Text style={styles.weekRangeText}>{formatWeekRange(weekDates)}</Text>
+        <View style={styles.dateNavCenter}>
+          <Text style={styles.dateValue}>{formatDateLabel(dateKey)}</Text>
+          {!isToday && (
+            <Pressable
+              onPress={() => onChange(todayKey)}
+              style={styles.todayButton}
+              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+            >
+              <Text style={styles.todayButtonText}>오늘</Text>
+            </Pressable>
+          )}
+        </View>
         <Pressable
           onPress={() => onChange(shiftDate(dateKey, 7))}
           style={styles.weekNavButton}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={styles.weekNavButtonText}>다음 주</Text>
+          <Text style={styles.weekNavArrow}>›</Text>
         </Pressable>
       </View>
 
@@ -175,21 +158,27 @@ function WeekDatePicker({
         {weekDates.map((weekDateKey) => {
           const selected = weekDateKey === dateKey;
           const today = weekDateKey === todayKey;
-          const weekday = WEEKDAY_LABELS[parseDateKey(weekDateKey).getDay()];
+          const dayOfWeek = parseDateKey(weekDateKey).getDay();
+          const weekday = WEEKDAY_LABELS[dayOfWeek];
+          const isSunday = dayOfWeek === 0;
+          const isSaturday = dayOfWeek === 6;
 
           return (
             <Pressable
               key={weekDateKey}
               onPress={() => onChange(weekDateKey)}
-              style={[
+              style={({ pressed }) => [
                 styles.dayChip,
                 selected && styles.dayChipActive,
                 today && !selected && styles.dayChipToday,
+                pressed && !selected && styles.dayChipPressed,
               ]}
             >
               <Text
                 style={[
                   styles.dayChipWeekday,
+                  isSunday && styles.dayChipSunday,
+                  isSaturday && styles.dayChipSaturday,
                   selected && styles.dayChipTextActive,
                 ]}
               >
@@ -203,6 +192,7 @@ function WeekDatePicker({
               >
                 {formatDayOfMonth(weekDateKey)}
               </Text>
+              {today && <View style={[styles.todayDot, selected && styles.todayDotActive]} />}
             </Pressable>
           );
         })}
@@ -296,10 +286,7 @@ export default function App() {
         ]}
       >
         <View style={styles.controlsPanel}>
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>캠퍼스</Text>
-            <CampusToggle campus={campus} onChange={setCampus} />
-          </View>
+          <CampusToggle campus={campus} onChange={setCampus} />
 
           <WeekDatePicker dateKey={dateKey} onChange={setDateKey} />
         </View>
@@ -364,14 +351,6 @@ const styles = StyleSheet.create({
     borderColor: "#e6d5c5",
     gap: 14,
   },
-  fieldGroup: {
-    gap: 10,
-  },
-  fieldLabel: {
-    fontSize: 13,
-    fontWeight: "800",
-    color: "#9a5d3b",
-  },
   segmentedControl: {
     flexDirection: "row",
     backgroundColor: "#efe2d5",
@@ -400,114 +379,110 @@ const styles = StyleSheet.create({
   dateCard: {
     backgroundColor: "#fff",
     borderRadius: 22,
-    padding: 16,
+    padding: 18,
     borderWidth: 1,
     borderColor: "#e7d7c8",
-    gap: 14,
+    gap: 16,
   },
-  dateHeader: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  dateHeaderText: {
-    gap: 6,
-  },
-  dateLabel: {
-    fontSize: 13,
-    fontWeight: "800",
-    color: "#9a5d3b",
-  },
-  dateValue: {
-    fontSize: 24,
-    fontWeight: "800",
-    color: "#2b140e",
-  },
-  todayShortcut: {
-    backgroundColor: "#35140a",
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  todayShortcutText: {
-    color: "#fff6ef",
-    fontSize: 13,
-    fontWeight: "800",
-  },
-  todayBadge: {
-    backgroundColor: "#f4e1d4",
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  todayBadgeText: {
-    color: "#8a5237",
-    fontSize: 13,
-    fontWeight: "800",
-  },
-  weekControlRow: {
+  dateNavRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     gap: 8,
   },
-  weekNavButton: {
-    borderWidth: 1,
-    borderColor: "#dcc4b4",
-    backgroundColor: "#fff8f2",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 14,
-    alignItems: "center",
-  },
-  weekNavButtonText: {
-    color: "#714634",
-    fontSize: 13,
-    fontWeight: "800",
-  },
-  weekRangeText: {
+  dateNavCenter: {
     flex: 1,
-    textAlign: "center",
-    fontSize: 14,
+    alignItems: "center",
+    gap: 6,
+  },
+  dateValue: {
+    fontSize: 20,
     fontWeight: "800",
-    color: "#5c3728",
+    color: "#2b140e",
+    textAlign: "center",
+  },
+  todayButton: {
+    backgroundColor: "#b14d27",
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+  todayButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  weekNavButton: {
+    width: 44,
+    height: 44,
+    backgroundColor: "#f5ece4",
+    borderRadius: 999,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  weekNavArrow: {
+    fontSize: 28,
+    lineHeight: 34,
+    color: "#714634",
+    fontWeight: "400",
+    marginTop: -2,
   },
   weekRow: {
     flexDirection: "row",
-    gap: 6,
+    gap: 5,
   },
   dayChip: {
     flex: 1,
     minWidth: 0,
     backgroundColor: "#fbf3ec",
     borderRadius: 16,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: "#ead9cd",
-    paddingVertical: 10,
+    paddingVertical: 12,
     alignItems: "center",
-    gap: 4,
+    gap: 3,
+    minHeight: 70,
+    justifyContent: "center",
   },
   dayChipToday: {
     borderColor: "#b14d27",
-    backgroundColor: "#fff2e8",
+    backgroundColor: "#fff4ee",
   },
   dayChipActive: {
     backgroundColor: "#b14d27",
     borderColor: "#b14d27",
+  },
+  dayChipPressed: {
+    backgroundColor: "#f0e0d6",
   },
   dayChipWeekday: {
     fontSize: 12,
     fontWeight: "700",
     color: "#8f624d",
   },
+  dayChipSunday: {
+    color: "#c0392b",
+  },
+  dayChipSaturday: {
+    color: "#2980b9",
+  },
   dayChipDate: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: "800",
     color: "#2d170f",
   },
   dayChipTextActive: {
     color: "#fff8f2",
+  },
+  todayDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: "#b14d27",
+    marginTop: 1,
+  },
+  todayDotActive: {
+    backgroundColor: "rgba(255,248,242,0.8)",
   },
   feedbackCard: {
     backgroundColor: "#fff",
