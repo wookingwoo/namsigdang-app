@@ -298,12 +298,19 @@ export const styles = StyleSheet.create({
   weekNavButtonPressed: {
     backgroundColor: "#dceaff",
   },
+  weekNavButtonDisabled: {
+    backgroundColor: "#f6faff",
+    borderColor: "#e1ebfb",
+  },
   weekNavArrow: {
     fontSize: 28,
     lineHeight: 32,
     color: "#1958b7",
     fontWeight: "400",
     marginTop: -2,
+  },
+  weekNavArrowDisabled: {
+    color: "#9bb2d3",
   },
   todayShortcutRow: {
     alignItems: "flex-end",
@@ -352,6 +359,10 @@ export const styles = StyleSheet.create({
   dayChipPressed: {
     backgroundColor: "#e7f0ff",
   },
+  dayChipDisabled: {
+    backgroundColor: "#f9fbff",
+    borderColor: "#e7efff",
+  },
   dayChipWeekday: {
     fontSize: 12,
     fontWeight: "800",
@@ -368,6 +379,12 @@ export const styles = StyleSheet.create({
     fontWeight: "900",
     color: "#143466",
   },
+  dayChipWeekdayDisabled: {
+    color: "#9bb2d3",
+  },
+  dayChipDateDisabled: {
+    color: "#96abc9",
+  },
   dayChipTextActive: {
     color: "#f5f9ff",
   },
@@ -380,6 +397,12 @@ export const styles = StyleSheet.create({
   },
   todayDotActive: {
     backgroundColor: "rgba(245, 249, 255, 0.88)",
+  },
+  dateLimitNotice: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#6d84aa",
+    textAlign: "right",
   },
   feedbackCard: {
     minHeight: 240,

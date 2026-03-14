@@ -4,6 +4,33 @@ const dayFormatter = new Intl.DateTimeFormat("ko-KR", {
   weekday: "long",
 });
 
+export const MENU_HISTORY_MONTHS = 3;
+
+function normalizeDate(date: Date) {
+  const normalizedDate = new Date(date);
+  normalizedDate.setHours(0, 0, 0, 0);
+  return normalizedDate;
+}
+
+function shiftCalendarMonths(date: Date, amount: number) {
+  const normalizedDate = normalizeDate(date);
+  const originalDay = normalizedDate.getDate();
+  const shiftedDate = new Date(normalizedDate);
+
+  shiftedDate.setDate(1);
+  shiftedDate.setMonth(shiftedDate.getMonth() + amount);
+
+  const lastDayOfTargetMonth = new Date(
+    shiftedDate.getFullYear(),
+    shiftedDate.getMonth() + 1,
+    0,
+  ).getDate();
+
+  shiftedDate.setDate(Math.min(originalDay, lastDayOfTargetMonth));
+
+  return shiftedDate;
+}
+
 export function createTodayKey() {
   return formatDateKey(new Date());
 }
@@ -19,6 +46,33 @@ export function parseDateKey(dateKey: string) {
   return new Date(year, month - 1, day);
 }
 
+export function createMenuHistoryStartKey(referenceDate = new Date()) {
+  return formatDateKey(shiftCalendarMonths(referenceDate, -MENU_HISTORY_MONTHS));
+}
+
+export function isDateKeyWithinMenuHistory(
+  dateKey: string,
+  referenceDate = new Date(),
+) {
+  const minimumDate = normalizeDate(
+    shiftCalendarMonths(referenceDate, -MENU_HISTORY_MONTHS),
+  );
+  const selectedDate = normalizeDate(parseDateKey(dateKey));
+
+  return selectedDate >= minimumDate;
+}
+
+export function clampDateKeyToMenuHistory(
+  dateKey: string,
+  referenceDate = new Date(),
+) {
+  if (isDateKeyWithinMenuHistory(dateKey, referenceDate)) {
+    return dateKey;
+  }
+
+  return createMenuHistoryStartKey(referenceDate);
+}
+
 export function formatDateKey(date: Date) {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
@@ -31,11 +85,23 @@ export function formatDateLabel(dateKey: string) {
   return dayFormatter.format(date);
 }
 
-export function getDateStripDates(dateKey: string, visibleDays: number) {
+export function getDateStripDates(
+  dateKey: string,
+  visibleDays: number,
+  minimumDateKey?: string,
+) {
   const selectedDate = parseDateKey(dateKey);
   const startDate = new Date(selectedDate);
   const daysBeforeSelected = Math.floor(visibleDays / 2);
+
   startDate.setDate(selectedDate.getDate() - daysBeforeSelected);
+
+  if (minimumDateKey) {
+    const minimumDate = parseDateKey(minimumDateKey);
+    if (startDate < minimumDate) {
+      startDate.setTime(minimumDate.getTime());
+    }
+  }
 
   return Array.from({ length: visibleDays }, (_, index) => {
     const currentDate = new Date(startDate);

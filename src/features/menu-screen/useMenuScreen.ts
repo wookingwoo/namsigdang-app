@@ -8,15 +8,22 @@ import {
   MENU_LOAD_ERROR_MESSAGE,
   isCampus,
 } from "./constants";
-import { createTodayKey } from "./date";
+import { clampDateKeyToMenuHistory, createTodayKey } from "./date";
 
 export function useMenuScreen() {
   const [campus, setCampus] = useState<Campus | null>(null);
-  const [dateKey, setDateKey] = useState(createTodayKey);
+  const [dateKey, setDateKeyState] = useState(createTodayKey);
   const [menuDay, setMenuDay] = useState<MenuDay | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCampusHydrated, setIsCampusHydrated] = useState(false);
+
+  function setDateKey(nextDateKey: string) {
+    setDateKeyState((currentDateKey) => {
+      const clampedDateKey = clampDateKeyToMenuHistory(nextDateKey);
+      return currentDateKey === clampedDateKey ? currentDateKey : clampedDateKey;
+    });
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -77,11 +84,18 @@ export function useMenuScreen() {
     let cancelled = false;
 
     async function loadMenu() {
+      const clampedDateKey = clampDateKeyToMenuHistory(dateKey);
+
+      if (clampedDateKey !== dateKey) {
+        setDateKeyState(clampedDateKey);
+        return;
+      }
+
       setLoading(true);
       setError(null);
 
       try {
-        const menu = await getMenuByDate(selectedCampus, dateKey);
+        const menu = await getMenuByDate(selectedCampus, clampedDateKey);
         if (!cancelled) {
           setMenuDay(menu);
         }
