@@ -173,7 +173,7 @@ export default function App() {
           <Text style={styles.kicker}>남도학숙 식단 서비스</Text>
           <Text style={styles.title}>남식당</Text>
           <Text style={styles.subtitle}>
-            {campusName} 식단을 웹, 안드로이드, iOS에서 한 번에 확인합니다.
+            {campusName} 식단을 빠르고 편하게 확인하세요.
           </Text>
         </View>
 
