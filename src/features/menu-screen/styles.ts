@@ -22,6 +22,13 @@ export const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  headerBrand: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: "row",
     alignItems: "center",
     gap: 12,
   },
@@ -50,6 +57,22 @@ export const styles = StyleSheet.create({
     lineHeight: 24,
     fontWeight: "700",
     color: "#5f7da9",
+  },
+  headerInfoButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 999,
+    backgroundColor: "#edf4ff",
+    borderWidth: 1,
+    borderColor: "#d2e2ff",
+  },
+  headerInfoButtonPressed: {
+    backgroundColor: "#dceaff",
+  },
+  headerInfoButtonText: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#1a58ba",
   },
   segmentedControl: {
     flexDirection: "row",
@@ -94,6 +117,130 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 22,
     elevation: 2,
+  },
+  aboutModalSafeArea: {
+    flex: 1,
+    backgroundColor: "#eaf2ff",
+  },
+  aboutModalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+    gap: 12,
+  },
+  aboutModalTitle: {
+    flex: 1,
+    fontSize: 24,
+    fontWeight: "900",
+    color: "#12356b",
+  },
+  aboutModalCloseButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 999,
+    backgroundColor: "#edf4ff",
+    borderWidth: 1,
+    borderColor: "#d2e2ff",
+  },
+  aboutModalCloseButtonPressed: {
+    backgroundColor: "#dceaff",
+  },
+  aboutModalCloseButtonText: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#1a58ba",
+  },
+  aboutModalContent: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 28,
+  },
+  aboutModalBody: {
+    width: "100%",
+  },
+  aboutModalBodyWide: {
+    maxWidth: 760,
+    alignSelf: "center",
+  },
+  infoCard: {
+    backgroundColor: "#f4f8ff",
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: "#d8e7ff",
+    padding: 18,
+    gap: 14,
+  },
+  infoCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  infoCardIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 999,
+  },
+  infoCardTitleWrap: {
+    flex: 1,
+    minWidth: 0,
+  },
+  infoEyebrow: {
+    fontSize: 12,
+    fontWeight: "900",
+    letterSpacing: 0.8,
+    color: "#5f7da9",
+    textTransform: "uppercase",
+  },
+  infoTitle: {
+    fontSize: 20,
+    lineHeight: 28,
+    fontWeight: "900",
+    color: "#12356b",
+  },
+  infoDescription: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: "#4f6b92",
+  },
+  infoMetaGroup: {
+    gap: 2,
+  },
+  infoMetaLabel: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#6f86a7",
+    textTransform: "uppercase",
+  },
+  infoMetaValue: {
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: "700",
+    color: "#16376d",
+  },
+  infoActionRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    paddingTop: 4,
+  },
+  infoActionButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 999,
+    backgroundColor: "#edf4ff",
+    borderWidth: 1,
+    borderColor: "#d2e2ff",
+  },
+  infoActionButtonPressed: {
+    backgroundColor: "#dceaff",
+  },
+  infoActionText: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#1a58ba",
   },
   dateCard: {
     gap: 16,
