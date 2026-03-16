@@ -2,6 +2,12 @@
 
 남도학숙 학생들이 은평관과 동작관 식단을 빠르게 확인할 수 있도록 만든 Expo 기반 통합 앱입니다. 하나의 코드베이스로 웹, 안드로이드, iOS를 함께 지원합니다.
 
+## namsigdang service
+- namsigdang-crawler: https://github.com/wookingwoo/namsigdang-crawler
+- namsigdang-app: https://github.com/wookingwoo/namsigdang-app
+- namsigdang-android-app: https://github.com/wookingwoo/namsigdang-android-app
+- namsigdang-chatbot: https://github.com/wookingwoo/namsigdang-chatbot
+
 ## 핵심 기능
 
 - 은평관 / 동작관 전환
