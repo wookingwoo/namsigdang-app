@@ -63,7 +63,19 @@ npm run web
 npm start
 ```
 
+## 주요 스크립트
+
+```bash
+npm run web                   # Expo 웹 개발 서버 실행
+npm run build:web             # Firebase 환경 변수 검증 후 Expo 웹 빌드 생성
+npm run validate:firebase-env # Firebase 환경 변수 누락 여부 확인
+npm run test                  # Node 테스트 실행
+npm run typecheck             # TypeScript 타입 검사
+```
+
 ## 환경 변수
+
+웹 빌드와 Firebase Hosting 배포에는 아래 값이 모두 필요합니다. GitHub Actions 배포에서는 같은 이름의 repository/organization variables를 먼저 사용하고, 없으면 repository secrets를 사용합니다.
 
 ```bash
 EXPO_PUBLIC_FIREBASE_API_KEY=

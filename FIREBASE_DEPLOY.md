@@ -12,7 +12,7 @@
 - `.env` 파일에 Firebase Web App 설정값이 들어 있어야 합니다.
 - `npm install`이 끝난 상태여야 합니다.
 
-환경 변수가 비어 있으면 웹 빌드는 되더라도 실행 시 Firebase 초기화가 실패할 수 있습니다.
+환경 변수가 비어 있으면 `npm run build:web` 단계에서 빌드가 실패합니다.
 
 ## 2. Firebase CLI 설치 및 로그인
 
@@ -125,23 +125,13 @@ firebase deploy --only hosting
 
 이 프로젝트는 Expo 웹 단일 페이지 앱으로 배포하는 구성이므로 `rewrites`가 있어야 새로고침이나 직접 URL 접근 시 404를 피할 수 있습니다.
 
-## 8. package.json 스크립트로 단축하기
+## 8. 관련 package.json 스크립트
 
-원하면 `package.json`에 아래 스크립트를 추가해 배포 명령을 줄일 수 있습니다.
-
-```json
-{
-  "scripts": {
-    "build:web": "expo export --platform web",
-    "deploy:hosting": "npm run build:web && firebase deploy --only hosting"
-  }
-}
-```
-
-추가 후에는 아래처럼 실행하면 됩니다.
+이 프로젝트는 배포 전 Firebase 환경 변수 검증을 위해 아래 스크립트를 사용합니다.
 
 ```bash
-npm run deploy:hosting
+npm run validate:firebase-env
+npm run build:web
 ```
 
 ## 9. 자주 발생하는 문제
@@ -160,4 +150,4 @@ npm run deploy:hosting
 
 ### 수정 내용이 반영되지 않음
 
-웹 코드 수정 후 `firebase deploy`만 실행하면 이전 빌드가 올라갈 수 있습니다. 항상 먼저 `npx expo export --platform web`를 다시 실행하세요.
+웹 코드 수정 후 `firebase deploy`만 실행하면 이전 빌드가 올라갈 수 있습니다. 항상 먼저 `npm run build:web`를 다시 실행하세요.
