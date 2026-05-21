@@ -49,7 +49,7 @@ firebase init hosting
 Expo 웹 산출물을 다시 만듭니다.
 
 ```bash
-npx expo export --platform web
+npm run build:web
 ```
 
 정상적으로 완료되면 `dist/` 폴더에 아래와 같은 파일이 생성됩니다.
@@ -62,6 +62,19 @@ dist/
 ```
 
 `.env` 값을 변경했다면 반드시 이 명령을 다시 실행한 뒤 배포해야 합니다.
+
+`npm run build:web`는 빌드 전에 Firebase 환경 변수가 모두 있는지 검사합니다. 값이 비어 있으면 Firebase 설정이 빈 문자열로 번들에 들어가 배포 사이트에서 식단 조회가 실패하므로, 누락된 키를 채운 뒤 다시 빌드해야 합니다.
+
+GitHub Actions로 배포한다면 repository 또는 organization variables에 아래 값을 모두 등록해야 합니다. 이미 repository secrets에 같은 이름으로 등록했다면 그대로 사용할 수 있습니다.
+
+```text
+EXPO_PUBLIC_FIREBASE_API_KEY
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN
+EXPO_PUBLIC_FIREBASE_PROJECT_ID
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+EXPO_PUBLIC_FIREBASE_APP_ID
+```
 
 ## 5. Firebase Hosting 배포
 
@@ -83,7 +96,7 @@ https://<project-id>.firebaseapp.com
 코드를 수정한 뒤 다시 배포할 때는 아래 두 명령만 실행하면 됩니다.
 
 ```bash
-npx expo export --platform web
+npm run build:web
 firebase deploy --only hosting
 ```
 
