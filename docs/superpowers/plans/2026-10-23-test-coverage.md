@@ -32,10 +32,10 @@ Files: package.json, package-lock.json, vitest.config.mts, .gitignore, src/featu
 
 Interfaces: existing date.ts exports remain the public boundary; npm test runs both existing CLI and new source tests.
 
-- [ ] Install compatible test-only dependencies and configure scoped coverage reporting.
-- [ ] Add literal, table-driven cases for formatting, leap/month/year transitions, three-month clamping, and five/seven-day navigation.
-- [ ] Run the new suite, reproduce any actual bug before touching production, and keep compatibility for existing picker behavior.
-- [ ] Commit the independently passing harness and date tests.
+- [x] Install compatible test-only dependencies and configure scoped coverage reporting.
+- [x] Add literal, table-driven cases for formatting, leap/month/year transitions, three-month clamping, and five/seven-day navigation.
+- [x] Run the new suite, reproduce any actual bug before touching production, and keep compatibility for existing picker behavior.
+- [x] Commit the independently passing harness and date tests.
 
 ### Task 2: Menu and Firebase regression suites
 
@@ -65,3 +65,5 @@ Interfaces: npm test, npm run test:coverage, npm run typecheck; Node 20/22/24; U
 
 - Baseline: develop 07fc28d; existing Node tests: 3 passed, 0 failed.
 - Dependency decision: Vitest 5 requires Node 22+, so use the compatible Vitest 4 line to preserve Node 20 CI support.
+- Task 1: 36 date tests passed; TypeScript check passed. No date implementation changes. Existing upper-bound disabled-chip behavior is intentionally preserved.
+- Environment: sandbox denied Vitest's temporary-cache rename; running the same test command outside the sandbox succeeds.
