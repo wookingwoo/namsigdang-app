@@ -15,7 +15,7 @@ export default defineConfig({
         "src/services/menu.ts",
         "src/config/firebase.ts",
       ],
-      reporter: ["text", "json-summary", "lcov"],
+      reporter: [["text", { skipFull: false }], "json-summary", "lcov"],
       thresholds: {
         perFile: true,
         lines: 100,
