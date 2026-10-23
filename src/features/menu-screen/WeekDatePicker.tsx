@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
 import { WEEKDAY_LABELS } from "./constants";
@@ -13,6 +14,7 @@ import {
   shiftDate,
 } from "./date";
 import { styles } from "./styles";
+import { colors } from "./theme";
 
 type WeekDatePickerProps = {
   dateKey: string;
@@ -53,14 +55,11 @@ export function WeekDatePicker({
           ]}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text
-            style={[
-              styles.weekNavArrow,
-              !canGoPrevious && styles.weekNavArrowDisabled,
-            ]}
-          >
-            ‹
-          </Text>
+          <Ionicons
+            name="chevron-back"
+            size={20}
+            color={canGoPrevious ? colors.ink : colors.inkFaint}
+          />
         </Pressable>
 
         <View style={styles.dateNavCenter}>
@@ -77,14 +76,11 @@ export function WeekDatePicker({
           ]}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text
-            style={[
-              styles.weekNavArrow,
-              !canGoNext && styles.weekNavArrowDisabled,
-            ]}
-          >
-            ›
-          </Text>
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={canGoNext ? colors.ink : colors.inkFaint}
+          />
         </Pressable>
       </View>
 
@@ -97,6 +93,7 @@ export function WeekDatePicker({
               pressed && styles.todayShortcutButtonPressed,
             ]}
           >
+            <Ionicons name="today-outline" size={14} color={colors.mintDark} />
             <Text style={styles.todayShortcutText}>오늘로 이동</Text>
           </Pressable>
         </View>

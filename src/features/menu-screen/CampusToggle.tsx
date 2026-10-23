@@ -1,8 +1,10 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
 import type { Campus } from "../../types/menu";
 import { CAMPUS_OPTIONS } from "./constants";
 import { styles } from "./styles";
+import { colors } from "./theme";
 
 type CampusToggleProps = {
   campus: Campus;
@@ -25,6 +27,11 @@ export function CampusToggle({ campus, onChange }: CampusToggleProps) {
               pressed && !selected && styles.segmentButtonPressed,
             ]}
           >
+            <Ionicons
+              name={selected ? "location" : "location-outline"}
+              size={15}
+              color={selected ? colors.onInk : colors.inkFaint}
+            />
             <Text
               style={[
                 styles.segmentButtonText,
