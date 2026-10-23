@@ -43,11 +43,11 @@ Files: src/services/menu.test.ts, src/config/firebase.test.ts, scripts/validate-
 
 Interfaces: getMenuByDate(campus, dateKey) returns MenuDay; Firebase functions retain their current signatures.
 
-- [ ] Verify document paths and per-campus/per-meal decoding with complete relevant fixtures; mock only network/initialization boundaries.
-- [ ] Cover missing documents/fields, whitespace, malformed values, invalid input, SDK rejection, and independent empty results.
-- [ ] Verify cached initialization, existing apps, every missing config field, development/production diagnostics, and retry after failures.
-- [ ] Expand CLI parser/precedence/exit-code cases, using isolated temporary folders with guaranteed cleanup.
-- [ ] Watch defect regressions fail, make minimal fixes, rerun the full suite, and commit each logical passing unit.
+- [x] Verify document paths and per-campus/per-meal decoding with complete relevant fixtures; mock only network/initialization boundaries.
+- [x] Cover missing documents/fields, whitespace, malformed values, invalid input, SDK rejection, and independent empty results.
+- [x] Verify cached initialization, existing apps, every missing config field, development/production diagnostics, and retry after failures.
+- [x] Expand CLI parser/precedence/exit-code cases, using isolated temporary folders with guaranteed cleanup.
+- [x] Watch defect regressions fail, make minimal fixes, rerun the full suite, and commit each logical passing unit.
 
 ### Task 3: Enforced coverage, CI, documentation, and PR
 
@@ -67,3 +67,5 @@ Interfaces: npm test, npm run test:coverage, npm run typecheck; Node 20/22/24; U
 - Dependency decision: Vitest 5 requires Node 22+, so use the compatible Vitest 4 line to preserve Node 20 CI support.
 - Task 1: 36 date tests passed; TypeScript check passed. No date implementation changes. Existing upper-bound disabled-chip behavior is intentionally preserved.
 - Environment: sandbox denied Vitest's temporary-cache rename; running the same test command outside the sandbox succeeds.
+- Task 2 RED: 11 failures demonstrated malformed/impossible dates reaching Firebase (10 cases) and shared empty results (1 case).
+- Task 2 GREEN: 86 source tests + 13 CLI/environment tests pass. date.ts, menu.ts, firebase.ts each meet 100% line/statement/function/branch coverage. Production changes are limited to menu input validation and fresh empty results; ISO and compact dates both remain supported.
