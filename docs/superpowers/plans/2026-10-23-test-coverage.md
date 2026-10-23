@@ -55,11 +55,11 @@ Files: .github/workflows/test.yml, README.md, final Vitest coverage thresholds.
 
 Interfaces: npm test, npm run test:coverage, npm run typecheck; Node 20/22/24; UTC/Asia/Seoul/America/Los_Angeles.
 
-- [ ] Add credential-free CI checks for supported Node versions, Windows/Linux, and representative time zones.
-- [ ] Enforce coverage for date.ts, menu.ts, and firebase.ts; document the precise scope and exclusions.
-- [ ] Run clean npm ci, full tests/coverage/typecheck, timezone runs, and web build using local config only.
-- [ ] Request one read-only whole-branch review, address substantive findings with regression tests, and commit final changes.
-- [ ] Push feature/test-coverage; open and attach a Korean PR targeting develop with reproduction, coverage, validation, and clear limitations.
+- [x] Add credential-free CI checks for supported Node versions, Windows/Linux, and representative time zones.
+- [x] Enforce coverage for date.ts, menu.ts, and firebase.ts; document the precise scope and exclusions.
+- [x] Run clean npm ci, full tests/coverage/typecheck, timezone runs, and web build using local config only.
+- [x] Request one read-only whole-branch review, address substantive findings with regression tests, and commit final changes.
+- [x] Push feature/test-coverage; open and attach a Korean PR targeting develop with reproduction, coverage, validation, and clear limitations.
 
 ## Execution evidence
 
@@ -69,3 +69,8 @@ Interfaces: npm test, npm run test:coverage, npm run typecheck; Node 20/22/24; U
 - Environment: sandbox denied Vitest's temporary-cache rename; running the same test command outside the sandbox succeeds.
 - Task 2 RED: 11 failures demonstrated malformed/impossible dates reaching Firebase (10 cases) and shared empty results (1 case).
 - Task 2 GREEN: 86 source tests + 13 CLI/environment tests pass. date.ts, menu.ts, firebase.ts each meet 100% line/statement/function/branch coverage. Production changes are limited to menu input validation and fresh empty results; ISO and compact dates both remain supported.
+- Task 3: clean npm ci succeeded. Full coverage passed in UTC, Asia/Seoul, and America/Los_Angeles. Expo web export and subsequent TypeScript check succeeded. git diff --check passed.
+- Independent read-only whole-branch review of 07fc28d..673622f: no Critical, Important, or Minor findings requiring changes. Reviewer additionally exercised 1,253 in-memory menu boundary checks without changing this checkout.
+- Review scope: rendering/hooks/native/live Firebase, invalid internal-helper or campus inputs, multiple-app selection, and full dotenv syntax remain outside the unit-test contract. Their existing behavior is preserved; regressions there would require separate integration/E2E coverage. Shared build-tool transitive updates were checked with clean install and web export.
+- Remote CI: all five OS/Node/timezone combinations passed in [run 39944777882](https://github.com/wookingwoo/namsigdang-app/actions/runs/39944777882).
+- Publication: CLI token lacked workflow-write scope; the already connected GitHub app published the exact local commits without changing permissions or history. [PR #3](https://github.com/wookingwoo/namsigdang-app/pull/3) targets develop and is attached to this chat.
