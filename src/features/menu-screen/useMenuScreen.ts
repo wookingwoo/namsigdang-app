@@ -17,6 +17,11 @@ export function useMenuScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCampusHydrated, setIsCampusHydrated] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
+
+  function reload() {
+    setReloadToken((token) => token + 1);
+  }
 
   function setDateKey(nextDateKey: string) {
     setDateKeyState((currentDateKey) => {
@@ -120,7 +125,7 @@ export function useMenuScreen() {
     return () => {
       cancelled = true;
     };
-  }, [campus, dateKey, isCampusHydrated]);
+  }, [campus, dateKey, isCampusHydrated, reloadToken]);
 
   return {
     campus,
@@ -130,5 +135,6 @@ export function useMenuScreen() {
     menuDay,
     loading,
     error,
+    reload,
   };
 }
