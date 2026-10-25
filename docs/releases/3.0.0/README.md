@@ -5,6 +5,7 @@
 ## 브랜치와 버전
 
 - 릴리즈 브랜치: `release/3.0.0`, 기준: `develop`의 파란 테마 커밋 `ec3df8c`.
+- 초안 PR: [#5](https://github.com/wookingwoo/namsigdang-app/pull/5). 네이티브 빌드·실기 검증·제출 정보의 남은 조건을 해결한 후 검토 상태를 바꾼다.
 - PR 대상: `main`. 병합하면 기존 Firebase Hosting 워크플로가 웹을 배포하므로, 초안 PR 검토 후 별도로 병합한다.
 - `release/` 브랜치의 PR은 Firebase Hosting 미리보기 빌드·배포를 건너뛴다. 준비 중인 산출물을 외부 호스팅에 자동 업로드하지 않는다.
 - 표시 버전: `3.0.0` (`app.json`, `package.json`, `package-lock.json`).
