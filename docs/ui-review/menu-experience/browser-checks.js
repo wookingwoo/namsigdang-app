@@ -32,6 +32,10 @@ async (page) => {
   const next = () => page.getByRole("button", { name: "다음 날짜", exact: true });
   const today = () => page.getByRole("button", { name: "오늘로 이동", exact: true });
 
+  if (await campus("동작관").getAttribute("aria-selected") === "true") {
+    await campus("은평관").click();
+    await page.getByText("간장불고기", { exact: true }).waitFor();
+  }
   await campus("동작관").click({ timeout: 3000 });
   await page.getByText("돼지불고기", { exact: true }).waitFor();
   check(await campus("동작관").getAttribute("aria-selected") === "true", "Campus selection must be announced.");
@@ -47,7 +51,7 @@ async (page) => {
   await next().click();
   await page.getByRole("alert").waitFor();
   await mode("success");
-  await page.getByRole("button", { name: "다시 불러오기", exact: true }).click();
+  await page.getByRole("button", { name: "다시 불러오기", exact: true }).click({ timeout: 3000 });
   await page.getByText("간장불고기", { exact: true }).waitFor();
   check(await page.getByRole("alert").count() === 0, "Retry must clear the error.");
 
@@ -95,4 +99,4 @@ async (page) => {
   await page.keyboard.press("Tab");
   check(await page.evaluate(() => document.activeElement !== document.body), "Keyboard focus must reach an interactive element.");
   return { result: "PASS", checks: ["campus", "dates", "today", "selected semantics", "retry", "loading", "stale cancellation", "partial empty", "empty", "modal Escape and focus", "touch targets", "responsive overflow", "reduced motion"], layouts, fixture: "Sample meals, not live dining data." };
-};
+}
