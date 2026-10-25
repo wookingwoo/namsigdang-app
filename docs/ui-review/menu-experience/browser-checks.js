@@ -11,9 +11,10 @@ async (page) => {
       ([, module]) => module.verboseName === "src/services/menu.ts",
     );
     if (!moduleEntry) throw new Error("Open the Expo development build first.");
-    globalThis.__menuReview = { mode: "success", pending: [] };
-    globalThis.__r(moduleEntry[0]).getMenuByDate = async (campus) => {
+    globalThis.__menuReview = { mode: "success", pending: [], requests: [] };
+    globalThis.__r(moduleEntry[0]).getMenuByDate = async (campus, dateKey) => {
       const state = globalThis.__menuReview;
+      state.requests.push({ campus, dateKey, mode: state.mode });
       if (state.mode === "error") throw new Error("Review: simulated offline");
       if (state.mode === "pending") {
         return await new Promise((resolve) => state.pending.push(resolve));
@@ -56,10 +57,30 @@ async (page) => {
   await mode("error");
   await next().click();
   await page.getByRole("alert").waitFor();
+  const selectedBeforeRetry = await page.getByRole("button", { name: /선택됨/ }).getAttribute("aria-label");
   await mode("success");
   await page.getByRole("button", { name: "다시 불러오기", exact: true }).click({ timeout: 3000 });
   await page.getByText("간장불고기", { exact: true }).waitFor();
   check(await page.getByRole("alert").count() === 0, "Retry must clear the error.");
+  check(await page.getByRole("button", { name: /선택됨/ }).getAttribute("aria-label") === selectedBeforeRetry, "Retry must preserve the selected date.");
+  check(await campus("은평관").getAttribute("aria-selected") === "true", "Retry must preserve the selected campus.");
+
+  // Retry itself is in flight when the date changes; its old result must be
+  // ignored just like an old request triggered by campus/date selection.
+  await mode("error");
+  await next().click();
+  await page.getByRole("alert").waitFor();
+  const retryDate = await page.getByRole("button", { name: /선택됨/ }).getAttribute("aria-label");
+  await mode("pending");
+  await page.getByRole("button", { name: "다시 불러오기", exact: true }).click();
+  await page.getByRole("status").waitFor();
+  await mode("success");
+  await next().click();
+  await page.getByText("간장불고기", { exact: true }).waitFor();
+  check(await page.getByRole("button", { name: /선택됨/ }).getAttribute("aria-label") !== retryDate, "Date selection must work during a pending retry.");
+  await page.evaluate(() => globalThis.__menuReview.pending.splice(0).forEach((resolve) => resolve({ breakfast: ["오래된 재시도"], lunch: [], dinner: [] })));
+  await page.waitForTimeout(100);
+  check(await page.getByText("오래된 재시도", { exact: true }).count() === 0, "A pending retry must not overwrite the newly selected date.");
 
   await mode("pending");
   await next().click();
@@ -104,5 +125,5 @@ async (page) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.keyboard.press("Tab");
   check(await page.evaluate(() => document.activeElement !== document.body), "Keyboard focus must reach an interactive element.");
-  return { result: "PASS", checks: ["campus", "dates", "today", "selected semantics", "retry", "loading", "stale cancellation", "partial empty", "empty", "modal Escape and focus", "touch targets", "responsive overflow", "reduced motion"], layouts, fixture: "Sample meals, not live dining data." };
+  return { result: "PASS", checks: ["campus", "dates", "today", "selected semantics", "retry retains campus/date", "pending retry/date race", "loading", "stale campus cancellation", "partial empty", "empty", "modal Escape and focus", "touch targets", "responsive overflow", "reduced motion"], layouts, fixture: "Sample meals, not live dining data." };
 }

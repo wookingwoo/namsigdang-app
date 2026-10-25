@@ -34,8 +34,10 @@ export function CampusToggle({ campus, onChange, wide = false }: CampusTogglePro
             accessibilityRole="tab"
             accessibilityLabel={option.label}
             accessibilityState={{ selected }}
-            tabIndex={selected ? 0 : -1}
-            {...(Platform.OS === "web" ? { onKeyDown: (event: KeyboardEvent<HTMLElement>) => handleKey(event, index) } : {})}
+            {...(Platform.OS === "web" ? {
+              tabIndex: selected ? 0 as const : -1 as const,
+              onKeyDown: (event: KeyboardEvent<HTMLElement>) => handleKey(event, index),
+            } : {})}
             onPress={() => onChange(option.value)}
             style={({ pressed }) => [
               styles.segmentButton,
