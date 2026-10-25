@@ -78,6 +78,8 @@ npm run typecheck             # TypeScript 타입 검사
 
 ## 테스트와 검증
 
+화면 구성, 전후 스크린샷과 브라우저 상호작용 검증 범위는 [UI·UX 검증 기록](docs/ui-review/menu-experience/README.md)에서 확인할 수 있습니다.
+
 테스트 도구는 Node.js 20.19 이상, 22.12 이상 또는 24 이상을 사용합니다. 테스트는 Firebase 자격 증명이나 실제 Firestore 연결 없이 실행됩니다. 외부 Firebase SDK 경계만 대체하고 날짜 계산, 입력 검증, 식단 변환과 초기화 로직은 실제 소스를 검사합니다.
 
 ```bash

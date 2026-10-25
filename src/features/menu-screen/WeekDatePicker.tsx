@@ -1,162 +1,61 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Pressable, Text, View } from "react-native";
-
+import { Text, View } from "react-native";
+import { Action } from "./Action";
+import { Icon } from "./Icon";
 import { WEEKDAY_LABELS } from "./constants";
-import {
-  createMenuHistoryEndKey,
-  createMenuHistoryStartKey,
-  createTodayKey,
-  formatDateLabel,
-  formatDayOfMonth,
-  getDateStripDates,
-  isDateKeyWithinMenuHistory,
-  parseDateKey,
-  shiftDate,
-} from "./date";
+import { createMenuHistoryEndKey, createMenuHistoryStartKey, createTodayKey, formatDateLabel, formatDayOfMonth, getDateStripDates, isDateKeyWithinMenuHistory, parseDateKey, shiftDate } from "./date";
 import { styles } from "./styles";
 import { colors } from "./theme";
 
-type WeekDatePickerProps = {
-  dateKey: string;
-  onChange: (dateKey: string) => void;
-  compact: boolean;
-};
+type WeekDatePickerProps = { dateKey: string; onChange: (dateKey: string) => void; compact: boolean };
 
-export function WeekDatePicker({
-  dateKey,
-  onChange,
-  compact,
-}: WeekDatePickerProps) {
+export function WeekDatePicker({ dateKey, onChange, compact }: WeekDatePickerProps) {
   const todayKey = createTodayKey();
-  const minimumDateKey = createMenuHistoryStartKey();
-  const maximumDateKey = createMenuHistoryEndKey();
-  const dateStripDates = getDateStripDates(
-    dateKey,
-    compact ? 5 : 7,
-    minimumDateKey,
-    maximumDateKey,
-  );
-  const isTodaySelected = dateKey === todayKey;
-  const previousDateKey = shiftDate(dateKey, -1);
-  const nextDateKey = shiftDate(dateKey, 1);
-  const canGoPrevious = isDateKeyWithinMenuHistory(previousDateKey);
-  const canGoNext = isDateKeyWithinMenuHistory(nextDateKey);
+  const dates = getDateStripDates(dateKey, compact ? 5 : 7, createMenuHistoryStartKey(), createMenuHistoryEndKey());
+  const isToday = dateKey === todayKey;
+  const previous = shiftDate(dateKey, -1);
+  const next = shiftDate(dateKey, 1);
+  const canPrevious = isDateKeyWithinMenuHistory(previous);
+  const canNext = isDateKeyWithinMenuHistory(next);
 
   return (
     <View style={styles.dateCard}>
       <View style={styles.dateNavRow}>
-        <Pressable
-          disabled={!canGoPrevious}
-          onPress={() => onChange(previousDateKey)}
-          style={({ pressed }) => [
-            styles.weekNavButton,
-            !canGoPrevious && styles.weekNavButtonDisabled,
-            pressed && styles.weekNavButtonPressed,
-          ]}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Ionicons
-            name="chevron-back"
-            size={20}
-            color={canGoPrevious ? colors.ink : colors.inkFaint}
-          />
-        </Pressable>
-
         <View style={styles.dateNavCenter}>
-          <Text style={styles.dateValue}>{formatDateLabel(dateKey)}</Text>
+          <Text style={styles.dateYear}>{parseDateKey(dateKey).getFullYear()}년</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.dateValue}>{formatDateLabel(dateKey)}</Text>
         </View>
-
-        <Pressable
-          disabled={!canGoNext}
-          onPress={() => onChange(nextDateKey)}
-          style={({ pressed }) => [
-            styles.weekNavButton,
-            !canGoNext && styles.weekNavButtonDisabled,
-            pressed && styles.weekNavButtonPressed,
-          ]}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Ionicons
-            name="chevron-forward"
-            size={20}
-            color={canGoNext ? colors.ink : colors.inkFaint}
-          />
-        </Pressable>
+        <Action accessibilityRole="button" accessibilityLabel="이전 날짜" accessibilityState={{ disabled: !canPrevious }} disabled={!canPrevious} onPress={() => onChange(previous)}
+          style={({ pressed }) => [styles.weekNavButton, !canPrevious && styles.disabled, pressed && styles.pressed]}>
+          <Icon name="chevron-back" size={21} color={colors.ink} />
+        </Action>
+        <Action accessibilityRole="button" accessibilityLabel="다음 날짜" accessibilityState={{ disabled: !canNext }} disabled={!canNext} onPress={() => onChange(next)}
+          style={({ pressed }) => [styles.weekNavButton, !canNext && styles.disabled, pressed && styles.pressed]}>
+          <Icon name="chevron-forward" size={21} color={colors.ink} />
+        </Action>
+        <Action accessibilityRole="button" accessibilityLabel="오늘로 이동" disabled={isToday} accessibilityState={{ disabled: isToday }} onPress={() => onChange(todayKey)}
+          style={({ pressed }) => [styles.todayShortcutButton, isToday && styles.todayShortcutDisabled, pressed && styles.pressed]}>
+          <Text style={[styles.todayShortcutText, isToday && styles.todayShortcutTextDisabled]}>오늘</Text>
+        </Action>
       </View>
-
-      {!isTodaySelected && (
-        <View style={styles.todayShortcutRow}>
-          <Pressable
-            onPress={() => onChange(todayKey)}
-            style={({ pressed }) => [
-              styles.todayShortcutButton,
-              pressed && styles.todayShortcutButtonPressed,
-            ]}
-          >
-            <Ionicons name="today-outline" size={14} color={colors.mintDark} />
-            <Text style={styles.todayShortcutText}>오늘로 이동</Text>
-          </Pressable>
-        </View>
-      )}
-
       <View style={styles.weekRow}>
-        {dateStripDates.map((stripDateKey) => {
-          const selected = stripDateKey === dateKey;
-          const today = stripDateKey === todayKey;
-          const disabled = !isDateKeyWithinMenuHistory(stripDateKey);
-          const dayOfWeek = parseDateKey(stripDateKey).getDay();
-          const weekday = WEEKDAY_LABELS[dayOfWeek];
-          const isSunday = dayOfWeek === 0;
-          const isSaturday = dayOfWeek === 6;
-
+        {dates.map((key) => {
+          const selected = key === dateKey;
+          const today = key === todayKey;
+          const disabled = !isDateKeyWithinMenuHistory(key);
+          const weekday = parseDateKey(key).getDay();
           return (
-            <Pressable
-              disabled={disabled}
-              key={stripDateKey}
-              onPress={() => onChange(stripDateKey)}
-              style={({ pressed }) => [
-                styles.dayChip,
-                selected && styles.dayChipActive,
-                today && !selected && styles.dayChipToday,
-                disabled && styles.dayChipDisabled,
-                pressed && !selected && styles.dayChipPressed,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.dayChipWeekday,
-                  isSunday && styles.dayChipSunday,
-                  isSaturday && styles.dayChipSaturday,
-                  disabled && styles.dayChipWeekdayDisabled,
-                  selected && styles.dayChipTextActive,
-                ]}
-              >
-                {weekday}
-              </Text>
-              <Text
-                style={[
-                  styles.dayChipDate,
-                  disabled && styles.dayChipDateDisabled,
-                  selected && styles.dayChipTextActive,
-                ]}
-              >
-                {formatDayOfMonth(stripDateKey)}
-              </Text>
-              {today ? (
-                <View
-                  style={[styles.todayDot, selected && styles.todayDotActive]}
-                />
-              ) : null}
-            </Pressable>
+            <Action key={key} accessibilityRole="button"
+              accessibilityLabel={formatDateLabel(key) + (today ? ", 오늘" : "") + (selected ? ", 선택됨" : "")}
+              accessibilityState={{ selected, disabled }} disabled={disabled} onPress={() => onChange(key)}
+              style={({ pressed }) => [styles.dayChip, today && styles.dayChipToday, selected && styles.dayChipActive, disabled && styles.dayChipDisabled, pressed && !selected && styles.pressed]}>
+              <Text style={[styles.dayChipWeekday, weekday === 0 && styles.dayChipSunday, weekday === 6 && styles.dayChipSaturday, selected && styles.dayChipTextActive]}>{WEEKDAY_LABELS[weekday]}</Text>
+              <Text style={[styles.dayChipDate, selected && styles.dayChipTextActive]}>{formatDayOfMonth(key)}</Text>
+              {today ? <Text style={[styles.todayIndicator, selected && styles.dayChipTextActive]}>오늘</Text> : <View style={styles.dayIndicatorSpace} />}
+            </Action>
           );
         })}
       </View>
-
-      {!canGoPrevious || !canGoNext ? (
-        <Text style={styles.dateLimitNotice}>
-          오늘 기준 3개월 전부터 3개월 후까지 식단을 조회할 수 있습니다.
-        </Text>
-      ) : null}
+      {(!canPrevious || !canNext) && <Text style={styles.dateLimitNotice}>오늘 기준 3개월 전부터 3개월 후까지 조회할 수 있어요.</Text>}
     </View>
   );
 }
