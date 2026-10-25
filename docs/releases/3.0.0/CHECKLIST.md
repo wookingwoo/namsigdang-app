@@ -2,6 +2,8 @@
 
 체크되지 않은 항목은 미완료 또는 미확인이다. 웹 내보내기 성공과 스토어 제출용 네이티브 빌드 성공을 구분한다.
 
+2026-10-26 사용자 결정: Mac 준비와 iOS 네이티브 빌드는 추후로 미룬다. 아래 iOS·iPhone·TestFlight 관련 항목은 보류된 참고 항목이며 현재 Android 작업의 차단 조건이 아니다.
+
 ## 계정·앱 식별자·서명
 
 - [ ] Google Play 개발자 계정·본인 확인·앱 접근 권한 확인.
@@ -12,7 +14,8 @@
 - [ ] iOS 신규/기존 앱 여부와 Bundle ID 확정; `ios.bundleIdentifier` 반영.
 - [ ] iOS 배포 인증서·프로비저닝 프로필과 buildNumber 확인.
 - [x] 빌드 실행·보관 모두 로컬 전용으로 확정. EAS 클라우드 빌드 사용 금지.
-- [ ] 기존 출시 키로 Android 최종 서명; iOS용 Mac/Xcode·Bundle ID·서명 정보 확인.
+- [ ] 기존 출시 키로 Android 최종 서명.
+- [ ] (보류) iOS용 Mac/Xcode·Bundle ID·서명 정보 확인.
 
 ## 빌드·보관
 
@@ -24,7 +27,7 @@
 - [x] 로컬 웹/Android·iOS JS 내보내기, 압축본과 해시 목록 작성.
 - [x] Windows 로컬 Gradle로 서명 전 Android AAB·APK 컴파일, 미서명 상태와 해시 확인.
 - [ ] **Android 제출용 AAB 생성 및 서명 확인.**
-- [ ] **iOS 제출용 IPA 생성 및 서명 확인.**
+- [ ] **(보류) iOS 제출용 IPA 생성 및 서명 확인.**
 - [x] Android target API 36, 64비트 라이브러리 ELF와 APK ZIP의 16KB 구조 검사 확인.
 - [ ] 실제 16KB 페이지 기기에서 실행 검증.
 - [ ] Android 최소 지원 버전이 기존 API 19에서 API 24(Android 7.0)로 높아지는 점 확인.

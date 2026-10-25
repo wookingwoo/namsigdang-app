@@ -2,6 +2,8 @@
 
 작성일: 2026-10-25 (Asia/Seoul). 이 문서는 출시 준비 기록이며 스토어 심사·출시 완료 기록이 아니다.
 
+범위 변경 (2026-10-26, Asia/Seoul): 사용자 요청으로 Mac 준비와 iOS 네이티브 빌드를 추후로 미뤘다. 현재 진행 범위는 Android 로컬 빌드와 출시 준비다. iOS 관련 항목은 향후 참고로 유지하며, 이번 Android 준비 작업의 차단 조건으로 취급하지 않는다.
+
 ## 브랜치와 버전
 
 - 릴리즈 브랜치: `release/3.0.0`, 기준: `develop`의 파란 테마 커밋 `ec3df8c`.
@@ -32,7 +34,7 @@
 | Android 권한 | INTERNET 및 앱 내부용 DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION만 남음 |
 | 16KB 구조 검사 | AAB/APK 각각 64비트 네이티브 라이브러리 26개 ELF 검사 통과, APK ZIP 정렬 검사 통과. 실제 16KB 기기 테스트는 미실행 |
 | 스토어 제출용 서명 | **미완료** — 기존 Android 서명·업로드 키 확인 필요 |
-| iOS IPA | **미생성** — Mac/Xcode·서명 정보·iOS Bundle ID 미확정 |
+| iOS IPA | **사용자 요청으로 보류** (2026-10-26) — 이번 진행 범위에서 제외, 추후 Mac/Xcode·서명 정보·iOS Bundle ID 확인 후 재개 |
 | Android/iPhone 실기 | 미실행 |
 
 Windows 샌드박스 안의 Hermes 임시 파일 쓰기 제한으로 첫 내보내기는 실패했다. 호스트 권한으로 같은 소스를 내보내 성공했다. 이 과정에서 클라우드 빌드나 스토어 업로드는 실행하지 않았다.
@@ -64,7 +66,7 @@ npx expo export --platform all --output-dir artifacts/3.0.0/export
 
 ## 스토어용 네이티브 빌드의 선행 조건
 
-Windows의 기존 Java/Android SDK 설치가 없어 공식 배포본을 `artifacts/3.0.0/toolchain/`에 준비한다. 시스템 전역 설치나 영구 환경 변수 변경은 하지 않는다. iOS 로컬 빌드는 macOS와 Xcode가 필요하므로 사용할 Mac과 서명 정보 확인이 필요하다.
+Windows의 기존 Java/Android SDK 설치가 없어 공식 배포본을 `artifacts/3.0.0/toolchain/`에 준비했다. 시스템 전역 설치나 영구 환경 변수 변경은 하지 않는다. iOS 로컬 빌드는 현재 보류 중이며, 재개할 때 사용할 Mac과 서명 정보를 확인한다.
 
 Windows Android 빌드는 `C:\Users\Public\Documents\ESTsoft\CreatorTemp\ns3-source`의 소스·의존성 복사본에 Expo prebuild를 실행하고 Gradle로 컴파일한다. 드라이브 경로 혼합을 피하기 위해 node_modules는 junction이 아닌 실제 복사본을 사용한다. 도구 경로에만 artifacts/3.0.0/을 가리키는 임시 N: 드라이브를 사용한다. 최종 산출물은 원래 프로젝트의 artifacts/3.0.0/에 복사하고 임시 드라이브를 해제한다. 생성된 프로젝트는 앱에서 사용하지 않는 저장소·오버레이·진동 권한을 제외한다. 로컬 SDK의 JavaScript 파일을 TypeScript가 검사하지 않도록 artifacts/ 등 생성물 폴더도 타입 검사에서 제외한다.
 
