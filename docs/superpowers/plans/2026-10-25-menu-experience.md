@@ -61,7 +61,7 @@
 - [x] Check 375px/768px/1440px, landscape, enlarged text, contrast, keyboard focus, reduced motion, and console errors.
 - [x] Capture before/after desktop/mobile and feedback/modal screenshots; label any fixture data.
 - [x] Request a fresh read-only whole-branch review, address substantive findings, and rerun affected checks.
-- [ ] Commit review evidence; push feature/menu-experience, create a detailed Korean PR into develop, attach it to this chat, and confirm images render.
+- [x] Commit review evidence; push feature/menu-experience, create a detailed Korean PR into develop, attach it to this chat, and confirm images render.
 
 ## Execution ledger
 
@@ -74,3 +74,4 @@
 - Final verification: 99 tests pass; core per-file coverage remains 100%; typecheck and final Expo production web export pass. Browser checks include four viewports, 200% text, measured contrast, modal trap/return, date bounds, storage, request races.
 - Final captures: before/after desktop/mobile, full mobile-width layout, empty/error/loading, information modal. Images use clearly labeled sample meals and latest source 982b09c.
 - Scope and native/live-data limitations documented in docs/ui-review/menu-experience/README.md.
+- Published and attached [PR #4](https://github.com/wookingwoo/namsigdang-app/pull/4) into develop. The description embeds nine screenshots pinned to fbe9053 and documents test data and native/live-data limits.
