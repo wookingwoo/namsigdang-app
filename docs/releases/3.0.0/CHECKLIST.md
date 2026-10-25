@@ -11,7 +11,8 @@
 - [ ] Apple Developer Program과 App Store Connect 권한 확인.
 - [ ] iOS 신규/기존 앱 여부와 Bundle ID 확정; `ios.bundleIdentifier` 반영.
 - [ ] iOS 배포 인증서·프로비저닝 프로필과 buildNumber 확인.
-- [ ] Expo 프로젝트·빌드 방식 확정. 클라우드 사용 시 소스와 산출물 보관 정책 승인 확인.
+- [x] 빌드 실행·보관 모두 로컬 전용으로 확정. EAS 클라우드 빌드 사용 금지.
+- [ ] 기존 출시 키로 Android 최종 서명; iOS용 Mac/Xcode·Bundle ID·서명 정보 확인.
 
 ## 빌드·보관
 
@@ -21,11 +22,14 @@
 - [x] 현재 릴리즈 소스에서 타입 검사·기존 99개 테스트·핵심 세 모듈 커버리지 통과.
 - [x] 로컬 내보내기 환경의 Firebase 환경 변수 6개 확인. 네이티브 최종 빌드 환경은 별도로 확인 필요.
 - [x] 로컬 웹/Android·iOS JS 내보내기, 압축본과 해시 목록 작성.
+- [x] Windows 로컬 Gradle로 서명 전 Android AAB·APK 컴파일, 미서명 상태와 해시 확인.
 - [ ] **Android 제출용 AAB 생성 및 서명 확인.**
 - [ ] **iOS 제출용 IPA 생성 및 서명 확인.**
-- [ ] 실제 Android target API 36 이상과 16KB 페이지 호환성 확인.
+- [x] Android target API 36, 64비트 라이브러리 ELF와 APK ZIP의 16KB 구조 검사 확인.
+- [ ] 실제 16KB 페이지 기기에서 실행 검증.
+- [ ] Android 최소 지원 버전이 기존 API 19에서 API 24(Android 7.0)로 높아지는 점 확인.
 - [ ] 실제 iOS 빌드가 Xcode 26+/iOS 26 SDK+를 사용하는지 확인.
-- [ ] 최종 바이너리의 앱 버전·식별자·빌드 번호·요청 권한 검사.
+- [x] 생성된 서명 전 Android 바이너리의 3.0.0/300·기존 식별자·최소 API 24·요청 권한 검사. 서명 후 최종 파일은 재확인 필요.
 - [x] Git 변경 파일과 산출물 ignore 규칙 확인. 최종 PR diff에서도 재확인.
 
 ## 운영·실기 검증

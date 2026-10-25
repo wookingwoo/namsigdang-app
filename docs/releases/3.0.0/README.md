@@ -26,16 +26,28 @@
 | 로컬 압축본 | namsigdang-3.0.0-export.zip, 7,448,670바이트 |
 | 프로덕션 웹 확인 | 임시 로컬 정적 서버에서 앱 로딩·양쪽 관 식단 조회·파란 테마 확인 |
 | 독립 코드 리뷰 | 수정이 필요한 지적 없음 |
-| 스토어용 AAB/IPA | **미생성** — 빌드 방식·네이티브 도구·서명 정보·iOS Bundle ID 미확정 |
+| Android 네이티브 컴파일 | **성공** — 로컬 Gradle bundleRelease/assembleRelease, 255개 태스크 실행 |
+| Android AAB/APK | **서명 전 파일 생성** — AAB 41,746,706바이트, APK 59,785,744바이트; jarsigner/apksigner로 미서명 확인 |
+| Android 메타데이터 | application ID 유지, versionName 3.0.0, versionCode 300, minSdk 24, targetSdk 36, ARM/ARM64/x86/x86_64 포함 |
+| Android 권한 | INTERNET 및 앱 내부용 DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION만 남음 |
+| 16KB 구조 검사 | AAB/APK 각각 64비트 네이티브 라이브러리 26개 ELF 검사 통과, APK ZIP 정렬 검사 통과. 실제 16KB 기기 테스트는 미실행 |
+| 스토어 제출용 서명 | **미완료** — 기존 Android 서명·업로드 키 확인 필요 |
+| iOS IPA | **미생성** — Mac/Xcode·서명 정보·iOS Bundle ID 미확정 |
 | Android/iPhone 실기 | 미실행 |
 
 Windows 샌드박스 안의 Hermes 임시 파일 쓰기 제한으로 첫 내보내기는 실패했다. 호스트 권한으로 같은 소스를 내보내 성공했다. 이 과정에서 클라우드 빌드나 스토어 업로드는 실행하지 않았다.
 
 ## 로컬 산출물 정책
 
+사용자가 **빌드 실행도 로컬에서만 진행**하도록 확정했다. 이 릴리즈에서 EAS 클라우드 빌드·클라우드 서명·원격 산출물 보관을 사용하지 않는다. 도구·의존성 다운로드는 로컬 컴파일을 위한 것이며 소스·빌드 파일 업로드를 포함하지 않는다.
+
 빌드 결과는 프로젝트 루트의 `artifacts/3.0.0/`에만 보관한다. 이 폴더와 APK/AAB/IPA·서명 파일은 `.gitignore`로 제외한다. PR에는 소스·설정·문서만 올리고 GitHub Releases나 Actions artifacts에 결과물을 업로드하지 않는다. 기존 `dist/`도 Git에서 제외되어 있다.
 
 `artifacts/3.0.0/BUILD-REPORT.md`와 `SHA256SUMS.txt`는 로컬 검증 기록이다. 파일 목록과 해시는 결과물 생성 후 기록한다. 웹/JavaScript 내보내기 결과는 스토어에 제출할 네이티브 바이너리가 아니다.
+
+Android 네이티브 파일은 `namsigdang-3.0.0-android-unsigned.aab`, `namsigdang-3.0.0-android-unsigned.apk`다. **둘 다 서명이 없어 그대로 설치하거나 스토어에 제출할 수 없다.** AAB는 기존 Play 업로드 키, 기존 Play 설치 앱을 대체하는 APK는 실제 앱 서명 인증서와의 호환성을 확인해야 한다. Play App Signing의 업로드 키와 앱 서명 키를 혼동하지 않는다.
+
+로컬 `NATIVE-ELF-REPORT.json`, `APK-METADATA.txt`, `AAB-SIGNATURE.txt`, `APK-SIGNATURE.txt`, `android-native-build.log`에 검증 근거를 보관한다. 도구·캐시·소스 복사본 역시 외부로 업로드하지 않는다.
 
 ## 로컬 내보내기
 
@@ -52,11 +64,28 @@ npx expo export --platform all --output-dir artifacts/3.0.0/export
 
 ## 스토어용 네이티브 빌드의 선행 조건
 
-현재 Windows 환경의 PATH에 Java/Android SDK/EAS CLI가 없고 표준 SDK 설치 경로도 확인되지 않았다. iOS 로컬 빌드는 macOS와 Xcode가 필요하다. Expo 로그인도 확인되지 않았다. 따라서 네이티브 빌드 도구와 서명 정보가 준비되기 전에는 스토어 제출용 빌드를 완료했다고 판단하지 않는다.
+Windows의 기존 Java/Android SDK 설치가 없어 공식 배포본을 `artifacts/3.0.0/toolchain/`에 준비한다. 시스템 전역 설치나 영구 환경 변수 변경은 하지 않는다. iOS 로컬 빌드는 macOS와 Xcode가 필요하므로 사용할 Mac과 서명 정보 확인이 필요하다.
+
+Windows Android 빌드는 `C:\Users\Public\Documents\ESTsoft\CreatorTemp\ns3-source`의 소스·의존성 복사본에 Expo prebuild를 실행하고 Gradle로 컴파일한다. 드라이브 경로 혼합을 피하기 위해 node_modules는 junction이 아닌 실제 복사본을 사용한다. 도구 경로에만 artifacts/3.0.0/을 가리키는 임시 N: 드라이브를 사용한다. 최종 산출물은 원래 프로젝트의 artifacts/3.0.0/에 복사하고 임시 드라이브를 해제한다. 생성된 프로젝트는 앱에서 사용하지 않는 저장소·오버레이·진동 권한을 제외한다. 로컬 SDK의 JavaScript 파일을 TypeScript가 검사하지 않도록 artifacts/ 등 생성물 폴더도 타입 검사에서 제외한다.
+
+Gradle 8.14.3 캐시는 동기화 드라이브의 이름 변경 충돌을 피하도록 전용 `CreatorTemp\ns3-gradle` 폴더를 사용한다. Java 21의 로컬 소켓 경로 오류는 전용 `CreatorTemp\ns3-java` 경로를 `jdk.net.unixdomain.tmpdir`로 지정해 해결했다. 모두 프로세스별 로컬 설정이며 시스템 보안 설정을 바꾸지 않는다. 로컬 재실행 명령은 artifacts/3.0.0/build-android-unsigned.ps1에 보관한다.
+
+검증 후 빌드용 Java 백그라운드 프로세스와 임시 N: 연결을 정리했다. 파일은 보존되어 있다. 같은 환경에서 다시 빌드하려면 프로젝트 루트에서 N: 드라이브가 비어 있는지 확인한 뒤 아래처럼 도구 경로를 연결한다. 서명 전 설정을 유지하는 명령이다.
+
+```powershell
+$localArtifactPath = (Resolve-Path 'artifacts/3.0.0').Path
+subst N: $localArtifactPath
+& ./artifacts/3.0.0/build-android-unsigned.ps1
+subst N: /D
+```
+
+네이티브 구성에서 buildTools 36.0.0, compileSdk/targetSdk 36, minSdk 24, NDK 27.1.12297006을 확인했다. **기존 앱 소스의 minSdk 19와 달리 이 버전은 Android 7.0(API 24) 이상을 요구하므로 출시 전에 지원 범위를 확인한다.**
+
+기존 출시 서명 키를 아직 확인하지 못했으므로 복사본의 release signingConfig를 명시적으로 null로 바꾼 후 **서명 전 AAB/APK**를 생성한다. Expo 기본 템플릿의 debug 키를 출시 서명으로 사용하지 않는다. 성공해도 기존 앱 업데이트나 스토어 제출이 가능한 최종 서명 파일로 간주하지 않는다.
 
 `eas.json`은 `credentialsSource: local`을 사용한다. 기존 앱용 키를 임의 생성하지 않으며, 실제 키 경로와 비밀번호가 있는 `credentials.json`은 로컬에서만 준비한다. Android의 업로드 키와 Play App Signing 설정, iOS 배포 인증서·프로비저닝 프로필을 확인한다. `ios.bundleIdentifier`와 Expo 프로젝트 연결도 확정해야 한다.
 
-지원되는 macOS/Linux 환경에서 도구·인증·서명·Firebase 설정을 준비한 후:
+아래 EAS 로컬 명령은 도구·인증·프로젝트 연결·서명이 준비된 macOS/Linux 환경에서 사용할 수 있는 참고 경로다. 현재 Windows Android 빌드에서는 EAS를 실행하지 않는다.
 
 ```bash
 npx eas-cli build --platform android --profile production --local --output artifacts/3.0.0/namsigdang-3.0.0-android.aab
@@ -64,7 +93,7 @@ npx eas-cli build --platform android --profile production --local --output artif
 npx eas-cli build --platform ios --profile production --local --output artifacts/3.0.0/namsigdang-3.0.0-ios.ipa
 ```
 
-`eas build --local`도 Expo 인증과 프로젝트 정보 확인을 위해 네트워크를 사용한다. EAS의 Windows/WSL 로컬 빌드는 공식 지원 대상이 아니다. Windows에서 Android를 직접 빌드하려면 Java·Android SDK를 설치한 뒤 Expo prebuild와 Gradle을 이용하는 별도 절차가 필요하다. 클라우드 빌드는 소스·서명 자료·산출물을 Expo로 전송하므로 사용자와 보관 정책을 먼저 확정한다. 이 PR에는 자동 업로드·자동 제출 워크플로를 추가하지 않는다.
+`eas build --local`도 Expo 인증과 프로젝트 정보 확인을 위해 네트워크를 사용한다. EAS의 Windows/WSL 로컬 빌드는 공식 지원 대상이 아니다. 이 PR에는 자동 업로드·자동 제출 워크플로를 추가하지 않는다.
 
 ## 공식 참고 자료
 
