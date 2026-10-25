@@ -8,3 +8,16 @@ coverage
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Local release output and native signing material. Never upload as PR/release assets.
+/artifacts/
+*.apk
+*.aab
+*.ipa
+*.xcarchive/
+*.jks
+*.keystore
+*.mobileprovision
+*.p12
+*.p8
+/credentials.json
