@@ -10,7 +10,10 @@
     "web": "expo start --web",
     "build:web": "npm run validate:firebase-env && expo export --platform web",
     "validate:firebase-env": "node scripts/validate-firebase-env.js",
-    "test": "node --test scripts/*.test.js",
+    "test": "npm run test:env && npm run test:unit",
+    "test:env": "node --test scripts/*.test.js",
+    "test:unit": "vitest run",
+    "test:coverage": "npm run test:env && vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -28,7 +31,9 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~19.1.10",
+    "@vitest/coverage-v8": "4.1.12",
     "babel-preset-expo": "~54.0.10",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "vitest": "4.1.12"
   }
 }
