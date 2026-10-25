@@ -1,4 +1,4 @@
-// Run with the Playwright browser_run_code tool's filename argument while the
+// Run with the Playwright browser_run_code_unsafe tool's filename argument while the
 // Expo development page is open. Only the network service export is replaced;
 // React, the screen, storage, dates, and interaction handlers remain real.
 // The fixture is browser-local and is never included in the application bundle.

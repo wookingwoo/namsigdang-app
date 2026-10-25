@@ -33,11 +33,11 @@
 
 **Interfaces:** Existing campus/date callbacks remain unchanged. MealCard accepts mealType, label, items, optional stretch. theme.ts exports semantic colors, scale tokens, mealTheme.
 
-- [ ] Capture baseline 375px and 1440px screens before product edits.
-- [ ] Record failing browser checks for unnamed date arrows / missing selected states before implementation.
-- [ ] Implement the chosen mint visual system, reduce nested surfaces, refine responsive layout, and add semantic labels and stable today shortcut.
-- [ ] Verify campus switching, date changes, today return, bounds, menu wrapping, and actual rendered roles/states.
-- [ ] Run typecheck and core tests; commit this independently working UI improvement.
+- [x] Capture baseline 375px and 1440px screens before product edits.
+- [x] Record failing browser checks for unnamed date arrows / missing selected states before implementation.
+- [x] Implement the chosen mint visual system, reduce nested surfaces, refine responsive layout, and add semantic labels and stable today shortcut.
+- [x] Verify campus switching, date changes, today return, bounds, menu wrapping, and actual rendered roles/states.
+- [x] Run typecheck and core tests; commit this independently working UI improvement.
 
 ### Task 2: Recovery and service information
 
@@ -45,11 +45,11 @@
 
 **Interfaces:** useMenuScreen returns existing state plus reload(): void. Reload retains current campus/date and reruns cancellation-safe loading. Feedback receives loading/error/onRetry and renders semantic status/alert with a usable button.
 
-- [ ] Demonstrate that an errored request has no retry action before implementation.
-- [ ] Add a retry trigger to the existing effect without removing cancellation on dependency changes.
-- [ ] Implement loading, empty, partial-empty, and error/retry presentations with honest copy.
-- [ ] Refine information modal and links, accessible close control, focus handling, Escape/back behavior.
-- [ ] Exercise error recovery, rapid selections, empty states, and modal keyboard navigation in the real browser; commit the passing behavior changes.
+- [x] Demonstrate that an errored request has no retry action before implementation.
+- [x] Add a retry trigger to the existing effect without removing cancellation on dependency changes.
+- [x] Implement loading, empty, partial-empty, and error/retry presentations with honest copy.
+- [x] Refine information modal and links, accessible close control, focus handling, Escape/back behavior.
+- [x] Exercise error recovery, rapid selections, empty states, and modal keyboard navigation in the real browser; commit the passing behavior changes.
 
 ### Task 3: Verification evidence and PR
 
@@ -57,10 +57,10 @@
 
 **Interfaces:** npm test, npm run test:coverage, npm run typecheck, npm run build:web. PR uses repository-rendered screenshot URLs at a pinned commit.
 
-- [ ] Run full tests/coverage/typecheck and production web export. Expected: all tests pass and existing coverage thresholds remain 100% per core file.
-- [ ] Check 375px/768px/1440px, landscape, enlarged text, contrast, keyboard focus, reduced motion, and console errors.
-- [ ] Capture before/after desktop/mobile and feedback/modal screenshots; label any fixture data.
-- [ ] Request a fresh read-only whole-branch review, address substantive findings, and rerun affected checks.
+- [x] Run full tests/coverage/typecheck and production web export. Expected: all tests pass and existing coverage thresholds remain 100% per core file.
+- [x] Check 375px/768px/1440px, landscape, enlarged text, contrast, keyboard focus, reduced motion, and console errors.
+- [x] Capture before/after desktop/mobile and feedback/modal screenshots; label any fixture data.
+- [x] Request a fresh read-only whole-branch review, address substantive findings, and rerun affected checks.
 - [ ] Commit review evidence; push feature/menu-experience, create a detailed Korean PR into develop, attach it to this chat, and confirm images render.
 
 ## Execution ledger
@@ -68,3 +68,9 @@
 - Baseline: 13 environment CLI tests + 86 source tests passed. Initial sandbox run could not rename Vitest's temporary SSR cache; the unchanged test suite passed with normal host permissions.
 - Working copy was clean. Created feature/menu-experience directly in the existing checkout so installed dependencies and local Firebase config stay available; no additional worktree was needed.
 - Browser tooling initially reached a different pre-existing app on port 8082. A dedicated local port is used for this task; no unrelated process is stopped.
+- Task 1 complete: 8a46dc7. Shared mint visual system and accessible campus/date navigation; 99 baseline regressions and typecheck pass.
+- Task 2 complete: 69b6650. Cancellation-preserving retry, static loading, empty/partial/error feedback, information modal; real-rendered checks pass.
+- Independent review: one native keyboard focus issue fixed in 982b09c, with failing then passing browser platform-branch regression. Pending-retry/date race additionally verified.
+- Final verification: 99 tests pass; core per-file coverage remains 100%; typecheck and final Expo production web export pass. Browser checks include four viewports, 200% text, measured contrast, modal trap/return, date bounds, storage, request races.
+- Final captures: before/after desktop/mobile, full mobile-width layout, empty/error/loading, information modal. Images use clearly labeled sample meals and latest source 982b09c.
+- Scope and native/live-data limitations documented in docs/ui-review/menu-experience/README.md.
