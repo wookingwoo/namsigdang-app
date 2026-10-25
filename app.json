@@ -2,7 +2,7 @@
   "expo": {
     "name": "남식당",
     "slug": "namsigdang-app",
-    "version": "1.0.0",
+    "version": "3.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -10,10 +10,21 @@
       "**/*"
     ],
     "android": {
+      "package": "com.wookingwoo.namdo_menu_V_1_1_0",
+      "versionCode": 300,
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.VIBRATE"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FAF7F1"
       }
+    },
+    "ios": {
+      "buildNumber": "1"
     },
     "web": {
       "bundler": "metro",
