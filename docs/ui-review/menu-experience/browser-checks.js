@@ -41,10 +41,16 @@ async (page) => {
   check(await campus("동작관").getAttribute("aria-selected") === "true", "Campus selection must be announced.");
   await campus("은평관").click();
   await page.getByText("간장불고기", { exact: true }).waitFor();
+  await campus("은평관").focus();
+  await page.keyboard.press("ArrowLeft");
+  await page.getByText("돼지불고기", { exact: true }).waitFor();
+  await page.keyboard.press("ArrowRight");
+  await page.getByText("간장불고기", { exact: true }).waitFor();
   await page.getByRole("button", { name: "이전 날짜", exact: true }).click();
   check(await today().isEnabled(), "Today shortcut must become enabled away from today.");
   await today().click();
   check(await today().isDisabled(), "Today shortcut stays visible and disabled on today.");
+  check(await today().evaluate((element) => !element.style.outlineWidth), "A disabled today shortcut must not retain a stale focus ring.");
   check(await page.getByRole("button", { name: /선택됨/ }).count() === 1, "Exactly one selected date must be named.");
 
   await mode("error");

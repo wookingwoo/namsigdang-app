@@ -12,7 +12,7 @@ const links = [
 
 export function AboutSheet({ visible, onClose, compact }: { visible: boolean; onClose: () => void; compact: boolean }) {
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
+    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent accessibilityLabel="서비스 정보">
       <View style={[styles.modalOverlay, compact && styles.modalOverlayCompact]}>
         <View style={styles.modalCard} accessibilityViewIsModal>
           <View style={styles.aboutModalHeader}>

@@ -13,7 +13,7 @@ export function MealCard({ mealType, label, items, stretch = false }: MealCardPr
       <View style={styles.mealHeader}>
         <View style={[styles.mealIconCircle, { backgroundColor: theme.tint }]}><Icon name={theme.icon} size={23} color={theme.dark} /></View>
         <View style={styles.mealHeaderText}>
-          <Text accessibilityRole="header" style={styles.mealLabel}>{label}</Text>
+          <Text accessibilityRole="header" aria-level={3} style={styles.mealLabel}>{label}</Text>
           <Text style={styles.mealMeta}>{theme.caption}</Text>
         </View>
       </View>

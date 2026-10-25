@@ -22,7 +22,7 @@ export function WeekDatePicker({ dateKey, onChange, compact }: WeekDatePickerPro
       <View style={styles.dateNavRow}>
         <View style={styles.dateNavCenter}>
           <Text style={styles.dateYear}>{parseDateKey(dateKey).getFullYear()}년</Text>
-          <Text accessibilityRole="header" style={styles.dateValue}>{formatDateLabel(dateKey)}</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.dateValue}>{formatDateLabel(dateKey)}</Text>
         </View>
         <Action accessibilityRole="button" accessibilityLabel="이전 날짜" accessibilityState={{ disabled: !canPrevious }} disabled={!canPrevious} onPress={() => onChange(previous)}
           style={({ pressed }) => [styles.weekNavButton, !canPrevious && styles.disabled, pressed && styles.pressed]}>
@@ -31,6 +31,10 @@ export function WeekDatePicker({ dateKey, onChange, compact }: WeekDatePickerPro
         <Action accessibilityRole="button" accessibilityLabel="다음 날짜" accessibilityState={{ disabled: !canNext }} disabled={!canNext} onPress={() => onChange(next)}
           style={({ pressed }) => [styles.weekNavButton, !canNext && styles.disabled, pressed && styles.pressed]}>
           <Icon name="chevron-forward" size={21} color={colors.ink} />
+        </Action>
+        <Action accessibilityRole="button" accessibilityLabel="오늘로 이동" disabled={isToday} accessibilityState={{ disabled: isToday }} onPress={() => onChange(todayKey)}
+          style={({ pressed }) => [styles.todayShortcutButton, isToday && styles.todayShortcutDisabled, pressed && styles.pressed]}>
+          <Text style={[styles.todayShortcutText, isToday && styles.todayShortcutTextDisabled]}>오늘</Text>
         </Action>
       </View>
       <View style={styles.weekRow}>
@@ -50,14 +54,6 @@ export function WeekDatePicker({ dateKey, onChange, compact }: WeekDatePickerPro
             </Action>
           );
         })}
-      </View>
-      <View style={styles.dateToolbar}>
-        <Text style={styles.dateHint}>다른 날의 식단도 확인해 보세요.</Text>
-        <Action accessibilityRole="button" accessibilityLabel="오늘로 이동" disabled={isToday} accessibilityState={{ disabled: isToday }} onPress={() => onChange(todayKey)}
-          style={({ pressed }) => [styles.todayShortcutButton, isToday && styles.todayShortcutDisabled, pressed && styles.pressed]}>
-          <Icon name="today-outline" size={16} color={isToday ? colors.inkSoft : colors.brandDark} />
-          <Text style={[styles.todayShortcutText, isToday && styles.todayShortcutTextDisabled]}>오늘</Text>
-        </Action>
       </View>
       {(!canPrevious || !canNext) && <Text style={styles.dateLimitNotice}>오늘 기준 3개월 전부터 3개월 후까지 조회할 수 있어요.</Text>}
     </View>

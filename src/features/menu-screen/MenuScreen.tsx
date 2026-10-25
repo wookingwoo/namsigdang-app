@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { ActivityIndicator, Image, SafeAreaView, ScrollView, Text, useWindowDimensions, View } from "react-native";
+import { Image, SafeAreaView, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import { AboutSheet } from "./AboutSheet";
 import { Action } from "./Action";
 import { CampusToggle } from "./CampusToggle";
 import { Icon } from "./Icon";
 import { MealCard } from "./MealCard";
+import { MenuFeedback } from "./MenuFeedback";
 import { MEAL_LABELS, MEAL_TYPES, getCampusLabel } from "./constants";
 import { createTodayKey } from "./date";
 import { styles } from "./styles";
@@ -16,8 +17,9 @@ import { WeekDatePicker } from "./WeekDatePicker";
 export function MenuScreen() {
   const [aboutVisible, setAboutVisible] = useState(false);
   const { width, fontScale } = useWindowDimensions();
-  const { campus, setCampus, dateKey, setDateKey, menuDay, loading, error } = useMenuScreen();
+  const { campus, setCampus, dateKey, setDateKey, menuDay, loading, error, reload } = useMenuScreen();
   const wide = width >= layout.wideBreakpoint && fontScale < 1.5;
+  const empty = menuDay && MEAL_TYPES.every((meal) => menuDay[meal].length === 0);
 
   return (
     <View style={styles.screen}>
@@ -39,8 +41,8 @@ export function MenuScreen() {
 
           <View style={[styles.intro, wide && styles.introWide]}>
             <View style={styles.introText}>
-              <Text accessibilityRole="header" style={[styles.pageTitle, wide && styles.pageTitleWide]}>{dateKey === createTodayKey() ? "오늘의 식단" : "선택한 날의 식단"}</Text>
-              <Text style={styles.subtitle}>아침부터 저녁까지, 한눈에 확인하세요.</Text>
+              <Text accessibilityRole="header" aria-level={1} style={[styles.pageTitle, wide && styles.pageTitleWide]}>{dateKey === createTodayKey() ? "오늘의 식단" : "선택한 날의 식단"}</Text>
+              {width >= 520 && <Text style={styles.subtitle}>아침부터 저녁까지, 한눈에 확인하세요.</Text>}
             </View>
             {campus ? <CampusToggle campus={campus} onChange={setCampus} wide={wide} /> : <View style={styles.controlsPlaceholder} />}
           </View>
@@ -49,20 +51,11 @@ export function MenuScreen() {
 
           <View style={styles.menuSection}>
             <View style={styles.menuSectionHeading}>
-              <Text accessibilityRole="header" style={styles.sectionTitle}>{campus ? getCampusLabel(campus) : "학숙"} 식단</Text>
+              <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>{campus ? getCampusLabel(campus) : "학숙"} 식단</Text>
               <Text style={styles.sectionMeta}>아침 · 점심 · 저녁</Text>
             </View>
-            {loading ? (
-              <View role="status" accessibilityLiveRegion="polite" style={styles.feedbackCard}>
-                <ActivityIndicator color={colors.brand} />
-                <Text style={styles.feedbackText}>식단을 불러오고 있어요.</Text>
-              </View>
-            ) : error ? (
-              <View accessibilityRole="alert" style={styles.feedbackCard}>
-                <View style={[styles.feedbackIcon, styles.feedbackErrorIcon]}><Icon name="cloud-offline-outline" size={26} color={colors.error} /></View>
-                <Text style={styles.feedbackTitle}>식단을 불러오지 못했어요</Text>
-                <Text style={styles.feedbackText}>{error}</Text>
-              </View>
+            {loading || error || empty ? (
+              <MenuFeedback kind={loading ? "loading" : error ? "error" : "empty"} wide={wide} onRetry={reload} />
             ) : (
               <View style={[styles.menuGrid, wide && styles.menuGridWide]}>
                 {MEAL_TYPES.map((mealType) => <View key={mealType} style={[styles.mealCardWrap, wide && styles.mealCardWrapWide]}>
